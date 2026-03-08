@@ -29,20 +29,17 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * {@link ExtensionLoader}, {@code DubboBootstrap} and this class are at present designed to be
- * singleton or static (by itself totally static or uses some static fields). So the instances
- * returned from them are of process scope. If you want to support multiple dubbo servers in one
- * single process, you may need to refactor those three classes.
  *
- * Represent a application which is using Dubbo and store basic metadata info for using
- * during the processing of RPC invoking.
+ * 当前 {@link ExtensionLoader}, {@code DubboBootstrap} 以及当前类
+ * 被设计成单例或静态的 (整体是静态的或者包含静态属性). 所以它们的实力具有类加载器或进程作用域,
+ * 如果你希望在单个进程中包含多个 Dubbo Server, 你需要重构上面提到的三个类
  * <p>
- * ApplicationModel includes many ProviderModel which is about published services
- * and many Consumer Model which is about subscribed services.
+ * 表示一个使用 Dubbo 的应用, 并存储在 RPC 调用过程中需要的元数据
  * <p>
- *
+ * ApplicationModel 包含许多 ProviderModel (关于已发布的服务) 和
+ * 许多 ConsumerModel (关于已订阅的服务)
+ * <p>
  */
-
 public class ApplicationModel {
     protected static final Logger LOGGER = LoggerFactory.getLogger(ApplicationModel.class);
     public static final String NAME = "application";

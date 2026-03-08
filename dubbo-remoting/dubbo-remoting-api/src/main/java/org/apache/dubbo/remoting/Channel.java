@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 
 /**
  * Channel. (API/SPI, Prototype, ThreadSafe)
+ * 有状态的链接, 具备存储 k-v 的能力
  *
  * @see org.apache.dubbo.remoting.Client
  * @see RemotingServer#getChannels()

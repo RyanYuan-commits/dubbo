@@ -60,14 +60,7 @@ public abstract class AbstractTest {
                         .outputTransportFactory(getTransportFactory())
                         .processor(getProcessor()));
 
-        Thread startTread = new Thread() {
-
-            @Override
-            public void run() {
-                server.serve();
-            }
-
-        };
+        Thread startTread = new Thread(() -> server.serve());
 
         startTread.setName("thrift-server");
 

@@ -16,6 +16,8 @@
  */
 package org.apache.dubbo.remoting.exchange;
 
+import org.apache.dubbo.remoting.exchange.support.DefaultFuture;
+
 import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
 /**
@@ -24,17 +26,20 @@ import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 public class Response {
 
     /**
-     * ok.
+     * 正常返回
      */
     public static final byte OK = 20;
 
     /**
-     * client side timeout.
+     * 客户端超时
+     * 由发起请求端设置, 当时间轮监听到请求超时时
+     * 若请求已经发送, 标识服务端超时, 反之则标识客户端超时
+     * @see DefaultFuture
      */
     public static final byte CLIENT_TIMEOUT = 30;
 
     /**
-     * server side timeout.
+     * 服务端超时
      */
     public static final byte SERVER_TIMEOUT = 31;
 
@@ -78,16 +83,34 @@ public class Response {
      */
     public static final byte SERVER_THREADPOOL_EXHAUSTED_ERROR = 100;
 
+    /**
+     * 响应的唯一标识, 与 Request 一致
+     */
     private long mId = 0;
 
+    /**
+     * 协议版本号, 与 Request 一直
+     */
     private String mVersion;
 
+    /**
+     * 响应状态
+     */
     private byte mStatus = OK;
 
+    /**
+     * 是否是事件
+     */
     private boolean mEvent = false;
 
+    /**
+     * 可读的错误响应消息
+     */
     private String mErrorMsg;
 
+    /**
+     * 响应体
+     */
     private Object mResult;
 
     public Response() {

@@ -62,16 +62,15 @@ import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.REMOVE_VALUE_PREFIX;
 
 /**
- * {@link org.apache.dubbo.rpc.model.ApplicationModel}, {@code DubboBootstrap} and this class are
- * at present designed to be singleton or static (by itself totally static or uses some static fields).
- * So the instances returned from them are of process or classloader scope. If you want to support
- * multiple dubbo servers in a single process, you may need to refactor these three classes.
+ * 当前 {@link org.apache.dubbo.rpc.model.ApplicationModel}, {@code DubboBootstrap} 以及当前类
+ * 被设计成单例或静态的 (整体是静态的或者包含静态属性). 所以它们的实力具有类加载器或进程作用域,
+ * 如果你希望在单个进程中包含多个 Dubbo Server, 你需要重构上面提到的三个类
  * <p>
- * Load dubbo extensions
+ * 加载 Dubbo 拓展
  * <ul>
- * <li>auto inject dependency extension </li>
- * <li>auto wrap extension in wrapper </li>
- * <li>default extension is an adaptive instance</li>
+ * <li>自动注入拓展依赖</li>
+ * <li>自动在包装器中包装拓展</li>
+ * <li>默认的拓展是一个自适应实例</li>
  * </ul>
  *
  * @see <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jar.html#Service%20Provider">Service Provider in Java 5</a>

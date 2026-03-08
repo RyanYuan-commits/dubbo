@@ -23,6 +23,8 @@ import java.util.Collection;
 
 /**
  * Remoting Server. (API/SPI, Prototype, ThreadSafe)
+ * 与 Client 的不同, RemotingServer 没有继承 Channel;
+ * RemotingServer 和 Channel 是平级关系, 持有多个 Client 发起的 Channel.
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Client%E2%80%93server_model">Client/Server</a>
  *
@@ -38,7 +40,8 @@ public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
     boolean isBound();
 
     /**
-     * get channels.
+     * 获取由 Client 发起的多个 Channel
+     * @see Client
      *
      * @return channels
      */

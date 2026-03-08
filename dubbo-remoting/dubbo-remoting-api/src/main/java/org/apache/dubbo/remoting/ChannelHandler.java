@@ -21,6 +21,7 @@ import org.apache.dubbo.common.extension.SPI;
 
 /**
  * ChannelHandler. (API, Prototype, ThreadSafe)
+ * 注册在 Endpoint 上的消息处理器, 方法命名为过去式, 处理的是已发生的事件
  *
  * @see org.apache.dubbo.remoting.Transporter#bind(org.apache.dubbo.common.URL, ChannelHandler)
  * @see org.apache.dubbo.remoting.Transporter#connect(org.apache.dubbo.common.URL, ChannelHandler)

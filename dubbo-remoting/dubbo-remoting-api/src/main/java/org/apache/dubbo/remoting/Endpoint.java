@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 
 /**
  * Endpoint. (API/SPI, Prototype, ThreadSafe)
+ * 代表网络中的一个端点, 是无状态的.
  *
  *
  * @see org.apache.dubbo.remoting.Channel
@@ -52,7 +53,7 @@ public interface Endpoint {
     InetSocketAddress getLocalAddress();
 
     /**
-     * send message.
+     * 用于向该 endpoint 发送消息
      *
      * @param message
      * @throws RemotingException
@@ -60,7 +61,7 @@ public interface Endpoint {
     void send(Object message) throws RemotingException;
 
     /**
-     * send message.
+     * 用于向该 endpoint 发送消息
      *
      * @param message
      * @param sent    already sent to socket?
