@@ -20,6 +20,10 @@ import org.apache.dubbo.common.lang.Prioritized;
 
 public interface LoadingStrategy extends Prioritized {
 
+    /**
+     * 定义当前加载策略扫描的目录，如 META-INF/dubbo/internal/
+     * @return 目录
+     */
     String directory();
 
     default boolean preferExtensionClassLoader() {
@@ -31,12 +35,13 @@ public interface LoadingStrategy extends Prioritized {
     }
 
     /**
-     * Indicates current {@link LoadingStrategy} supports overriding other lower prioritized instances or not.
+     * 如果在加载过程中发现前面已经加载过同名拓展类，本次加载是否会覆盖前面的拓展类
      *
-     * @return if supports, return <code>true</code>, or <code>false</code>
+     * @return 如果是，return true；反之，return false
      * @since 2.7.7
      */
     default boolean overridden() {
         return false;
     }
+
 }

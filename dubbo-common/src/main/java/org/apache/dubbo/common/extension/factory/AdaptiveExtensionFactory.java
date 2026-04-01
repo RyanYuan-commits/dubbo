@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * AdaptiveExtensionFactory
+ * 自适应拓展依赖工厂，尝试从类对应的 {@link ExtensionLoader} 或者 Spring Context 中获取拓展依赖
  */
 @Adaptive
 public class AdaptiveExtensionFactory implements ExtensionFactory {

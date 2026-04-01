@@ -24,31 +24,32 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker for extension interface
+ * 扩展接口的标识注解
  * <p/>
- * Changes on extension configuration file <br/>
- * Use <code>Protocol</code> as an example, its configuration file 'META-INF/dubbo/com.xxx.Protocol' is changed from: <br/>
+ * 扩展配置文件格式的变更说明：<br/>
+ * 以 Protocol 为例，其配置文件 'META-INF/dubbo/com.xxx.Protocol' 的格式从：<br/>
  * <pre>
  *     com.foo.XxxProtocol
  *     com.foo.YyyProtocol
  * </pre>
  * <p>
- * to key-value pair <br/>
+ * 变更为键值对格式：<br/>
  * <pre>
  *     xxx=com.foo.XxxProtocol
  *     yyy=com.foo.YyyProtocol
  * </pre>
  * <br/>
- * The reason for this change is:
+ * 格式变更的原因：
  * <p>
- * If there's third party library referenced by static field or by method in extension implementation, its class will
- * fail to initialize if the third party library doesn't exist. In this case, dubbo cannot figure out extension's id
- * therefore cannot be able to map the exception information with the extension, if the previous format is used.
+ * 如果扩展实现类中的静态字段或方法引用了第三方库，当该第三方库不存在时，扩展实现类将无法成功初始化。
+ * 在这种情况下，如果沿用之前的文件格式，Dubbo 将无法识别扩展的标识 (id)，
+ * 因此无法将异常信息与具体的扩展关联起来。
  * <p/>
- * For example:
+ * 示例场景：
  * <p>
- * Fails to load Extension("mina"). When user configure to use mina, dubbo will complain the extension cannot be loaded,
- * instead of reporting which extract extension implementation fails and the extract reason.
+ * 加载 Extension("mina") 失败。当用户配置使用 mina 时，
+ * 采用新格式后 Dubbo 能够明确指出是哪个扩展无法加载，
+ * 而不是模糊地报告扩展加载失败，从而能提供更精确的错误信息和原因定位。
  * </p>
  */
 @Documented
@@ -57,7 +58,7 @@ import java.lang.annotation.Target;
 public @interface SPI {
 
     /**
-     * default extension name
+     * 默认拓展名
      */
     String value() default "";
 

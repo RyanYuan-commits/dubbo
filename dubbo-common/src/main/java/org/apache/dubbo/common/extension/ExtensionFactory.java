@@ -17,17 +17,18 @@
 package org.apache.dubbo.common.extension;
 
 /**
- * ExtensionFactory
+ * 拓展注入器，自适应拓展为 {@link org.apache.dubbo.common.extension.factory.AdaptiveExtensionFactory}
+ * 在 {@link ExtensionLoader#injectExtension(Object) 为拓展类注入属性的方法} 中用于获取被注入的实例
  */
 @SPI
 public interface ExtensionFactory {
 
     /**
-     * Get extension.
+     * 通过类型和名称获取拓展属性
      *
-     * @param type object type.
-     * @param name object name.
-     * @return object instance.
+     * @param type 拓展类型
+     * @param name 拓展名称
+     * @return 拓展实例
      */
     <T> T getExtension(Class<T> type, String name);
 

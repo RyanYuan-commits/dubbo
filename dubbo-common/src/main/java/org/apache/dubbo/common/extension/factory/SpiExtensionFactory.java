@@ -21,7 +21,7 @@ import org.apache.dubbo.common.extension.ExtensionLoader;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
- * SpiExtensionFactory
+ * SPI 依赖加载工厂，从对应的 ExtensionLoader 中获取依赖
  */
 public class SpiExtensionFactory implements ExtensionFactory {
 

@@ -17,7 +17,7 @@
 package org.apache.dubbo.common.utils;
 
 /**
- * Helper Class for hold a value.
+ * 用于持有一个 value（volatile 类型）
  */
 public class Holder<T> {
 

@@ -61,33 +61,21 @@ import static org.apache.dubbo.common.convert.Converter.convertIfPossible;
 import static org.apache.dubbo.common.utils.StringUtils.isBlank;
 
 /**
- * URL - Uniform Resource Locator (Immutable, ThreadSafe)
+ * URL （不可变的，内存安全的）
+ * 不可变体现在所有的 set 方法返回的均是新 URL 对象
+ * URL 本质上是一个特殊格式的字符串，一个标准的 URL 格式为：
+ * protocol://username:password@host:port/path?key=value&key=value
  * <p>
- * url example:
- * <ul>
- * <li>http://www.facebook.com/friends?param1=value1&amp;param2=value2
- * <li>http://username:password@10.20.130.230:8080/list?version=1.0.0
- * <li>ftp://username:password@192.168.1.7:21/1/read.txt
- * <li>registry://192.168.1.7:9090/org.apache.dubbo.service1?param1=value1&amp;param2=value2
- * </ul>
+ * Dubbo 中的一个典型的 URL 示例：
+ * dubbo://172.17.32.91:20880/org.apache.dubbo.demo.DemoService?anyhost=true&application=dubbo-demo-api-provider
+ * &dubbo=2.0.2&interface=org.apache.dubbo.demo.DemoService&methods=sayHello,sayHelloAsync&pid=32508
+ * &release=&side=provider&timestamp=1593253404714
+ * </p>
+ * 除了没有 username:password 其他部分和标准 URL 格式一致
  * <p>
- * Some strange example below:
- * <ul>
- * <li>192.168.1.3:20880<br>
- * for this case, url protocol = null, url host = 192.168.1.3, port = 20880, url path = null
- * <li>file:///home/user1/router.js?type=script<br>
- * for this case, url protocol = file, url host = null, url path = home/user1/router.js
- * <li>file://home/user1/router.js?type=script<br>
- * for this case, url protocol = file, url host = home, url path = user1/router.js
- * <li>file:///D:/1/router.js?type=script<br>
- * for this case, url protocol = file, url host = null, url path = D:/1/router.js
- * <li>file:/D:/1/router.js?type=script<br>
- * same as above file:///D:/1/router.js?type=script
- * <li>/home/user1/router.js?type=script <br>
- * for this case, url protocol = null, url host = null, url path = home/user1/router.js
- * <li>home/user1/router.js?type=script <br>
- * for this case, url protocol = null, url host = home, url path = user1/router.js
- * </ul>
+ * Dubbo 提供了两个关于 URL 的工具类 {@link URLBuilder}, {@link URLStrParser}
+ * 分别用于构建 URL 和将字符串解析为 URL 对象
+ * </p>
  *
  * @see java.net.URL
  * @see java.net.URI

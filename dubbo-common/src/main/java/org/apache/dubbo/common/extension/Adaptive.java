@@ -17,6 +17,7 @@
 package org.apache.dubbo.common.extension;
 
 import org.apache.dubbo.common.URL;
+import org.apache.dubbo.remoting.ChannelHandler;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -25,7 +26,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Provide helpful information for {@link ExtensionLoader} to inject dependency extension instance.
+ * 用于标识适配器逻辑
+ * <p>
+ * 当使用在类上时，表明当前类是一个适配器类，且内部自主实现了适配器逻辑
+ * 如 {@link org.apache.dubbo.common.extension.factory.AdaptiveExtensionFactory}
+ * </p>
+ *
+ * <p>
+ * 当使用在方法上时，Dubbo 框架会介入，在运行时根据 URL 参数动态选择具体的拓展实现。
+ * 如 {@link org.apache.dubbo.remoting.Transporter#bind(URL, ChannelHandler)}
+ * </p>
+ * <p>
+ * 某个接口只能任选一种实现适配的方式
+ * <ol>
+ * <li>某个子类上标注 @Adaptive 注解，在子类内部实现适配器类</li>
+ * <li>在当前接口的方法上标注 @Adaptive，指定 URL 参数（可选））</li>
+ * </ol>
+ * </p>
  *
  * @see ExtensionLoader
  * @see URL
@@ -34,26 +51,25 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
 public @interface Adaptive {
+
     /**
-     * Decide which target extension to be injected. The name of the target extension is decided by the parameter passed
-     * in the URL, and the parameter names are given by this method.
+     * 指定使用 URL 中的哪个参数作为注入的拓展名称。
      * <p>
-     * If the specified parameters are not found from {@link URL}, then the default extension will be used for
-     * dependency injection (specified in its interface's {@link SPI}).
+     * 如果从 {@link URL} 中找不到指定的参数，则使用在 {@link SPI} 指定的默认扩展进行依赖注入
      * <p>
-     * For example, given <code>String[] {"key1", "key2"}</code>:
+     * 例如，给定 <code>String[] {"key1", "key2"}</code>：
      * <ol>
-     * <li>find parameter 'key1' in URL, use its value as the extension's name</li>
-     * <li>try 'key2' for extension's name if 'key1' is not found (or its value is empty) in URL</li>
-     * <li>use default extension if 'key2' doesn't exist either</li>
-     * <li>otherwise, throw {@link IllegalStateException}</li>
+     * <li>在 URL 中查找参数 'key1'，使用其值作为扩展的名称</li>
+     * <li>如果在 URL 中找不到 'key1'（或其值为空），则尝试使用 'key2' 作为扩展名称</li>
+     * <li>如果 'key2' 也不存在，则使用默认扩展</li>
+     * <li>否则，抛出 {@link IllegalStateException}</li>
      * </ol>
-     * If the parameter names are empty, then a default parameter name is generated from interface's
-     * class name with the rule: divide classname from capital char into several parts, and separate the parts with
-     * dot '.', for example, for {@code org.apache.dubbo.xxx.YyyInvokerWrapper}, the generated name is
-     * <code>String[] {"yyy.invoker.wrapper"}</code>.
+     * 如果参数名称为空，则会根据接口的类名生成一个默认参数名，规则是：
+     * 将类名按大写字母分成几部分，然后用点'.'分隔这些部分，例如，
+     * 对于 {@code org.apache.dubbo.xxx.YyyInvokerWrapper}，生成的名称是
+     * <code>String[] {"yyy.invoker.wrapper"}</code>。
      *
-     * @return parameter names in URL
+     * @return URL 中的参数名称
      */
     String[] value() default {};
 

@@ -132,9 +132,14 @@ public class ClassUtils {
     }
 
     /**
-     * get class loader
+     * 获取类加载器，依照优先级：
+     * <ol>
+     * <li>当前线程的上下文类加载器，最安全</li>
+     * <li>加载传入的类的类加载器</li>
+     * <li>系统类加载器</li>
+     * </ol>
      *
-     * @param clazz
+     * @param clazz 类
      * @return class loader
      */
     public static ClassLoader getClassLoader(Class<?> clazz) {
@@ -142,13 +147,11 @@ public class ClassUtils {
         try {
             cl = Thread.currentThread().getContextClassLoader();
         } catch (Throwable ex) {
-            // Cannot access thread context ClassLoader - falling back to system class loader...
+            // 获取不到线程上下文类加载器，降级
         }
         if (cl == null) {
-            // No thread context class loader -> use class loader of this class.
             cl = clazz.getClassLoader();
             if (cl == null) {
-                // getClassLoader() returning null indicates the bootstrap ClassLoader
                 try {
                     cl = ClassLoader.getSystemClassLoader();
                 } catch (Throwable ex) {

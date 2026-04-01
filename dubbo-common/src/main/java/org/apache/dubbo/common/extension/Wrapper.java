@@ -17,17 +17,17 @@
 package org.apache.dubbo.common.extension;
 
 /**
- * The annotated class will only work as a wrapper when the condition matches.
+ * 当类被 @Wrapper 注释时，仅有匹配的类才会被包装
  */
 public @interface Wrapper {
 
     /**
-     * the extension names that need to be wrapped.
+     * 需要被包装的拓展名称数组
      */
     String[] matches() default {};
 
     /**
-     * the extension names that need to be excluded.
+     * 需要被排除的拓展名称数组
      */
     String[] mismatches() default {};
 }

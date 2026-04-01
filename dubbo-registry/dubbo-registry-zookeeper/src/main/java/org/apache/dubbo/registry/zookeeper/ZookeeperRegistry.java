@@ -57,7 +57,6 @@ import static org.apache.dubbo.common.constants.RegistryConstants.ROUTERS_CATEGO
 
 /**
  * ZookeeperRegistry
- *
  */
 public class ZookeeperRegistry extends FailbackRegistry {
 
@@ -259,6 +258,17 @@ public class ZookeeperRegistry extends FailbackRegistry {
         return toServicePath(url) + PATH_SEPARATOR + url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY);
     }
 
+    /**
+     * 返回案例
+     * <p>
+     * /dubbo/org.apache.dubbo.demo.DemoService/providers/
+     * dubbo://10.189.12.101:20880/org.apache.dubbo.demo.DemoService?anyhost=true&application=dubbo-demo-api-provider
+     * &default=true&deprecated=false&dubbo=2.0.2&dynamic=true&generic=false&interface=org.apache.dubbo.demo.DemoService
+     * &methods=sayHello,sayHelloAsync&pid=52786&release=&side=provider&timestamp=1773625971654
+     * </p>
+     * @param url URL
+     * @return url path
+     */
     private String toUrlPath(URL url) {
         return toCategoryPath(url) + PATH_SEPARATOR + URL.encode(url.toFullString());
     }
@@ -293,12 +303,12 @@ public class ZookeeperRegistry extends FailbackRegistry {
     }
 
     /**
-     * When zookeeper connection recovered from a connection loss, it need to fetch the latest provider list.
-     * re-register watcher is only a side effect and is not mandate.
+     * 当 zookeeper 链接从断开恢复时，需要拉取最新的 provider 列表，
+     * 重新注册 watcher 是一种顺带行为，不是强制的
      */
     private void fetchLatestAddresses() {
-        // subscribe
-        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<URL, Set<NotifyListener>>(getSubscribed());
+        // 恢复
+        Map<URL, Set<NotifyListener>> recoverSubscribed = new HashMap<>(getSubscribed());
         if (!recoverSubscribed.isEmpty()) {
             if (logger.isInfoEnabled()) {
                 logger.info("Fetching the latest urls of " + recoverSubscribed.keySet());

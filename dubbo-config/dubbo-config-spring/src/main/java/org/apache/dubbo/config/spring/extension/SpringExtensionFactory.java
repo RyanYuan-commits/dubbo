@@ -29,12 +29,13 @@ import org.springframework.context.ConfigurableApplicationContext;
 import java.util.Set;
 
 /**
- * SpringExtensionFactory
+ * Spring 拓展依赖加载器，从 Spring 上下文中获取对应依赖
  */
 public class SpringExtensionFactory implements ExtensionFactory {
+
     private static final Logger logger = LoggerFactory.getLogger(SpringExtensionFactory.class);
 
-    private static final Set<ApplicationContext> CONTEXTS = new ConcurrentHashSet<ApplicationContext>();
+    private static final Set<ApplicationContext> CONTEXTS = new ConcurrentHashSet<>();
 
     public static void addApplicationContext(ApplicationContext context) {
         CONTEXTS.add(context);
@@ -57,10 +58,8 @@ public class SpringExtensionFactory implements ExtensionFactory {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T getExtension(Class<T> type, String name) {
-
-        //SPI should be get from SpiExtensionFactory
+        // 无视掉有 SPI 注解的依赖，这部分依赖应该从 SpiExtensionFactory 获取
         if (type.isInterface() && type.isAnnotationPresent(SPI.class)) {
             return null;
         }
@@ -72,8 +71,7 @@ public class SpringExtensionFactory implements ExtensionFactory {
             }
         }
 
-        //logger.warn("No spring extension (bean) named:" + name + ", try to find an extension (bean) of type " + type.getName());
-
         return null;
     }
+
 }
