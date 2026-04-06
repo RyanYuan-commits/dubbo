@@ -17,7 +17,14 @@
 
 package org.apache.dubbo.common.serialize;
 
+/**
+ * 为不同的序列化实现分配了唯一的字节类型标识符，这些 ID 在协议编码过程中被写入协议头，
+ * 确保通信双方能够正确识别和解析数据格式，其最大值为 31。
+ *
+ * @see Serialization#getContentTypeId()
+ */
 public interface Constants {
+
     byte HESSIAN2_SERIALIZATION_ID = 2;
     byte JAVA_SERIALIZATION_ID = 3;
     byte COMPACTED_JAVA_SERIALIZATION_ID = 4;
@@ -33,4 +40,5 @@ public interface Constants {
 
     byte PROTOBUF_SERIALIZATION_ID = 22;
     byte KRYO_SERIALIZATION2_ID = 25;
+
 }

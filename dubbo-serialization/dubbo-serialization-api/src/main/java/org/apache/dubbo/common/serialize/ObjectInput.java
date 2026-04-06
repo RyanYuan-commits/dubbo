@@ -21,55 +21,52 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
- * Object input interface.
+ * 对象输入接口。
  */
 public interface ObjectInput extends DataInput {
 
     /**
-     * Consider use {@link #readObject(Class)} or {@link #readObject(Class, Type)} where possible
+     * 尽可能使用 {@link #readObject(Class)} 或 {@link #readObject(Class, Type)}
      *
-     * @return object
-     * @throws IOException if an I/O error occurs
-     * @throws ClassNotFoundException if an ClassNotFoundException occurs
+     * @return 对象
+     * @throws IOException 如果发生 I/O 错误
+     * @throws ClassNotFoundException 如果发生类未找到异常
      */
     @Deprecated
     Object readObject() throws IOException, ClassNotFoundException;
 
     /**
-     * read object
+     * 读取对象
      *
-     * @param cls object class
-     * @return object
-     * @throws IOException if an I/O error occurs
-     * @throws ClassNotFoundException if an ClassNotFoundException occurs
+     * @param cls 对象类
+     * @return 对象
+     * @throws IOException 如果发生 I/O 错误
+     * @throws ClassNotFoundException 如果发生类未找到异常
      */
     <T> T readObject(Class<T> cls) throws IOException, ClassNotFoundException;
 
     /**
-     * read object
+     * 读取对象
      *
-     * @param cls object class
-     * @param type object type
-     * @return object
-     * @throws IOException if an I/O error occurs
-     * @throws ClassNotFoundException if an ClassNotFoundException occurs
+     * @param cls 对象类
+     * @param type 对象类型
+     * @return 对象
+     * @throws IOException 如果发生 I/O 错误
+     * @throws ClassNotFoundException 如果发生类未找到异常
      */
     <T> T readObject(Class<T> cls, Type type) throws IOException, ClassNotFoundException;
 
 
     /**
-     * The following methods are customized for the requirement of Dubbo's RPC protocol implementation. Legacy protocol
-     * implementation will try to write Map, Throwable and Null value directly to the stream, which does not meet the
-     * restrictions of all serialization protocols.
+     * 以下方法是为满足 Dubbo RPC 协议实现的需求而定制的。旧版协议实现会尝试直接将 Map、Throwable 和 Null 值写入流中，
+     * 这并不符合所有序列化协议的限制。
      *
      * <p>
-     * See how ProtobufSerialization, KryoSerialization implemented these methods for more details.
-     * <p>
-     * <p>
-     * The binding of RPC protocol and biz serialization protocol is not a good practice. Encoding of RPC protocol
-     * should be highly independent and portable, easy to cross platforms and languages, for example, like the http headers,
-     * restricting the content of headers / attachments to Ascii strings and uses ISO_8859_1 to encode them.
-     * https://tools.ietf.org/html/rfc7540#section-8.1.2
+     * 有关更多详细信息，请参阅 ProtobufSerialization、KryoSerialization 如何实现这些方法。
+     * </p>
+     *
+     * 将 RPC 协议与业务序列化协议绑定并不是一个好的实践。RPC 协议的编码应高度独立且可移植，易于跨平台和语言，
+     * 例如像 HTTP 头一样，将头/附件的内容限制为 ASCII 字符串，并使用 ISO_8859_1 对其进行编码。
      */
     default Throwable readThrowable() throws IOException, ClassNotFoundException {
         Object obj = readObject();
@@ -86,4 +83,5 @@ public interface ObjectInput extends DataInput {
     default Map<String, Object> readAttachments() throws IOException, ClassNotFoundException {
         return readObject(Map.class);
     }
+
 }

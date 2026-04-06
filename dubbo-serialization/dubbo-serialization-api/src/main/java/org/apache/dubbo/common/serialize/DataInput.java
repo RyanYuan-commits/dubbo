@@ -19,79 +19,79 @@ package org.apache.dubbo.common.serialize;
 import java.io.IOException;
 
 /**
- * Basic data type input interface.
+ * 基本数据类型输入接口。
  */
 public interface DataInput {
 
     /**
-     * Read boolean.
+     * 读取布尔值。
      *
-     * @return boolean.
-     * @throws IOException
+     * @return 布尔值。
+     * @throws IOException IO异常
      */
     boolean readBool() throws IOException;
 
     /**
-     * Read byte.
+     * 读取字节。
      *
-     * @return byte value.
-     * @throws IOException
+     * @return 字节值。
+     * @throws IOException IO异常
      */
     byte readByte() throws IOException;
 
     /**
-     * Read short integer.
+     * 读取短整型。
      *
-     * @return short.
-     * @throws IOException
+     * @return 短整型值。
+     * @throws IOException IO异常
      */
     short readShort() throws IOException;
 
     /**
-     * Read integer.
+     * 读取整型。
      *
-     * @return integer.
-     * @throws IOException
+     * @return 整型值。
+     * @throws IOException IO异常
      */
     int readInt() throws IOException;
 
     /**
-     * Read long.
+     * 读取长整型。
      *
-     * @return long.
-     * @throws IOException
+     * @return 长整型值。
+     * @throws IOException IO异常
      */
     long readLong() throws IOException;
 
     /**
-     * Read float.
+     * 读取浮点型。
      *
-     * @return float.
-     * @throws IOException
+     * @return 浮点型值。
+     * @throws IOException IO异常
      */
     float readFloat() throws IOException;
 
     /**
-     * Read double.
+     * 读取双精度浮点型。
      *
-     * @return double.
-     * @throws IOException
+     * @return 双精度浮点型值。
+     * @throws IOException IO异常
      */
     double readDouble() throws IOException;
 
     /**
-     * Read UTF-8 string.
+     * 读取 UTF-8 字符串。
      *
-     * @return string.
-     * @throws IOException
+     * @return 字符串。
+     * @throws IOException IO异常
      */
     String readUTF() throws IOException;
 
     /**
-     * Read byte array.
+     * 读取字节数组。
      *
-     * @return byte array.
-     * @throws IOException
+     * @return 字节数组。
+     * @throws IOException IO异常
      */
     byte[] readBytes() throws IOException;
 }

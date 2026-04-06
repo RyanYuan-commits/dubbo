@@ -20,30 +20,27 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Object output interface.
+ * 对象输出接口
  */
 public interface ObjectOutput extends DataOutput {
 
     /**
-     * write object.
+     * 写入对象
      *
      * @param obj object.
      */
     void writeObject(Object obj) throws IOException;
 
     /**
-     * The following methods are customized for the requirement of Dubbo's RPC protocol implementation. Legacy protocol
-     * implementation will try to write Map, Throwable and Null value directly to the stream, which does not meet the
-     * restrictions of all serialization protocols.
+     * 以下方法是为满足 Dubbo RPC 协议实现的需求而定制的。旧版协议实现会尝试直接将 Map、Throwable 和 Null 值写入流中，
+     * 这并不符合所有序列化协议的限制。
      *
      * <p>
-     * See how ProtobufSerialization, KryoSerialization implemented these methods for more details.
-     * <p>
+     * 有关更多详细信息，请参阅 ProtobufSerialization、KryoSerialization 如何实现这些方法。
+     * </p>
      *
-     * The binding of RPC protocol and biz serialization protocol is not a good practice. Encoding of RPC protocol
-     * should be highly independent and portable, easy to cross platforms and languages, for example, like the http headers,
-     * restricting the content of headers / attachments to Ascii strings and uses ISO_8859_1 to encode them.
-     * https://tools.ietf.org/html/rfc7540#section-8.1.2
+     * 将 RPC 协议与业务序列化协议绑定并不是一个好的实践。RPC 协议的编码应高度独立且可移植，易于跨平台和语言，
+     * 例如像 HTTP 头一样，将头/附件的内容限制为 ASCII 字符串，并使用 ISO_8859_1 对其进行编码。
      */
     default void writeThrowable(Object obj) throws IOException {
         writeObject(obj);

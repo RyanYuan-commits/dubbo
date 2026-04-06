@@ -17,12 +17,13 @@
 package org.apache.dubbo.common.serialize;
 
 /**
- * Interface defines that the object is cleanable.
+ * 表示在对象回收之前，有一些关联内容需要清理
  */
 public interface Cleanable {
 
     /**
-     * Implementations must implement this cleanup method
+     * 具体的清理方法的实现
      */
     void cleanup();
+
 }

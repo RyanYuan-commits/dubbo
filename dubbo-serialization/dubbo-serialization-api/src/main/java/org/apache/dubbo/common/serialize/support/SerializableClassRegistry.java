@@ -20,42 +20,42 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Provide a unified serialization registry, this class used for {@code dubbo-serialization-fst}
- * and {@code dubbo-serialization-kryo}, it will register some classes at startup time (for example {@link AbstractKryoFactory#create})
+ * 提供统一的序列化注册表，此类用于 {@code dubbo-serialization-fst}
+ * 和 {@code dubbo-serialization-kryo}，它将在启动时注册一些类（例如 {@link AbstractKryoFactory#create}）
  */
 public abstract class SerializableClassRegistry {
-
 
     private static final Map<Class<?>, Object> REGISTRATIONS = new LinkedHashMap<>();
 
     /**
-     * only supposed to be called at startup time
+     * 仅应在启动时调用
      *
-     * @param clazz object type
+     * @param clazz 对象类型
      */
     public static void registerClass(Class<?> clazz) {
         registerClass(clazz, null);
     }
 
     /**
-     * only supposed to be called at startup time
+     * 仅应在启动时调用
      *
-     * @param clazz object type
-     * @param serializer object serializer
+     * @param clazz 对象类型
+     * @param serializer 对象序列化器
      */
     public static void registerClass(Class<?> clazz, Object serializer) {
         if (clazz == null) {
-            throw new IllegalArgumentException("Class registered to kryo cannot be null!");
+            throw new IllegalArgumentException("注册到 kryo 的类不能为空！");
         }
         REGISTRATIONS.put(clazz, serializer);
     }
 
     /**
-     * get registered classes
+     * 获取已注册的类
      *
-     * @return class serializer
+     * @return 类序列化器映射
      * */
     public static Map<Class<?>, Object> getRegisteredClasses() {
         return REGISTRATIONS;
     }
+
 }

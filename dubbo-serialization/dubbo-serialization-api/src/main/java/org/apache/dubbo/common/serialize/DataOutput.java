@@ -19,96 +19,96 @@ package org.apache.dubbo.common.serialize;
 import java.io.IOException;
 
 /**
- * Basic data type output interface.
+ * 基本数据类型输出接口。
  */
 public interface DataOutput {
 
     /**
-     * Write boolean.
+     * 写入布尔值。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeBool(boolean v) throws IOException;
 
     /**
-     * Write byte.
+     * 写入字节。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeByte(byte v) throws IOException;
 
     /**
-     * Write short.
+     * 写入短整型。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeShort(short v) throws IOException;
 
     /**
-     * Write integer.
+     * 写入整型。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeInt(int v) throws IOException;
 
     /**
-     * Write long.
+     * 写入长整型。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeLong(long v) throws IOException;
 
     /**
-     * Write float.
+     * 写入浮点型。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeFloat(float v) throws IOException;
 
     /**
-     * Write double.
+     * 写入双精度浮点型。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeDouble(double v) throws IOException;
 
     /**
-     * Write string.
+     * 写入字符串。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeUTF(String v) throws IOException;
 
     /**
-     * Write byte array.
+     * 写入字节数组。
      *
-     * @param v value.
-     * @throws IOException
+     * @param v 值。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeBytes(byte[] v) throws IOException;
 
     /**
-     * Write byte array.
+     * 写入字节数组。
      *
-     * @param v value.
-     * @param off the start offset in the data.
-     * @param len the number of bytes that are written.
-     * @throws IOException
+     * @param v 值。
+     * @param off 数据中的起始偏移量。
+     * @param len 要写入的字节数。
+     * @throws IOException 如果发生 I/O 错误。
      */
     void writeBytes(byte[] v, int off, int len) throws IOException;
 
     /**
-     * Flush buffer.
+     * 刷新缓冲区。
      *
-     * @throws IOException
+     * @throws IOException 如果发生 I/O 错误。
      */
     void flushBuffer() throws IOException;
 }
