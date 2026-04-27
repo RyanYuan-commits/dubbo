@@ -39,8 +39,6 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
 /**
  * GrizzlyClient
- *
- *
  */
 public class GrizzlyClient extends AbstractClient {
 

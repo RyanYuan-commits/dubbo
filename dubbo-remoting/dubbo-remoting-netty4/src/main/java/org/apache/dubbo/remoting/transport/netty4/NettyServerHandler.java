@@ -108,7 +108,7 @@ public class NettyServerHandler extends ChannelDuplexHandler {
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-        // server will close channel when server don't receive any heartbeat from client util timeout.
+        // 如果 server 在 timeout 之前还没有收到来自 client 的心跳，server 将会关闭连接
         if (evt instanceof IdleStateEvent) {
             NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
             try {

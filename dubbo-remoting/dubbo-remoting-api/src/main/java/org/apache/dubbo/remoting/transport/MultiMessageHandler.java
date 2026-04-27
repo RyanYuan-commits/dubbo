@@ -22,6 +22,8 @@ import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.exchange.support.MultiMessage;
 
 /**
+ * 专门处理 {@link MultiMessage} 的 channel handler 实现，这是一种特殊的，包含了多条消息的消息类型，
+ * MultiMessageHandler 会遍历这些消息，然后交给底层的 {@link ChannelHandler handler} 处理。
  *
  * @see MultiMessage
  */
@@ -31,7 +33,6 @@ public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
         super(handler);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void received(Channel channel, Object message) throws RemotingException {
         if (message instanceof MultiMessage) {
@@ -43,4 +44,5 @@ public class MultiMessageHandler extends AbstractChannelHandlerDelegate {
             handler.received(channel, message);
         }
     }
+
 }

@@ -31,7 +31,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.DEFAULT_TIMEOUT;
 import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 
 /**
- * AbstractEndpoint
+ * 继承 {@link AbstractPeer}，在其基础上拓展了 reset 能力，
+ * 封装了编解码器以及两个超时时间。
+ * <p>
+ * 关键子类 {@link AbstractClient}、{@link AbstractServer}
  */
 public abstract class AbstractEndpoint extends AbstractPeer implements Resetable {
 
@@ -55,6 +58,7 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
         if (ExtensionLoader.getExtensionLoader(Codec2.class).hasExtension(codecName)) {
             return ExtensionLoader.getExtensionLoader(Codec2.class).getExtension(codecName);
         } else {
+            // 在新接口找不到拓展名，从老接口中查找，目前 Codec 接口已废弃
             return new CodecAdapter(ExtensionLoader.getExtensionLoader(Codec.class)
                     .getExtension(codecName));
         }

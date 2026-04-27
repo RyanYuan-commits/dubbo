@@ -21,7 +21,23 @@ import org.apache.dubbo.common.extension.SPI;
 
 /**
  * ChannelHandler. (API, Prototype, ThreadSafe)
- * 注册在 Endpoint 上的消息处理器, 方法命名为过去式, 处理的是已发生的事件
+ * 注册在 Endpoint 上的消息处理器, 方法命名为过去式, 处理的是已发生的事件。
+ * <p>
+ * 有三条继承链路
+ * <ol>
+ *     <li>
+ *         {@link org.apache.dubbo.remoting.transport.ChannelHandlerDispatcher ChannelHandlerDispatcher}：
+ *         存储多个 channel handler，事件触发后，分别调用 channel handler 的对应方法；
+ *     </li>
+ *     <li>
+ *         {@link org.apache.dubbo.remoting.transport.ChannelHandlerAdapter ChannelHandlerAdapter}：
+ *         空实现，TelnetHandlerAdapter 继承并实现该类；
+ *     </li>
+ *     <li>
+ *         {@link org.apache.dubbo.remoting.transport.ChannelHandlerDelegate ChannelhandlerDelegate}：
+ *         对另一个 channel 的封装，用于对消息做处理或分发。
+ *     </li>
+ * </ol>
  *
  * @see org.apache.dubbo.remoting.Transporter#bind(org.apache.dubbo.common.URL, ChannelHandler)
  * @see org.apache.dubbo.remoting.Transporter#connect(org.apache.dubbo.common.URL, ChannelHandler)
@@ -29,42 +45,14 @@ import org.apache.dubbo.common.extension.SPI;
 @SPI
 public interface ChannelHandler {
 
-    /**
-     * on channel connected.
-     *
-     * @param channel channel.
-     */
     void connected(Channel channel) throws RemotingException;
 
-    /**
-     * on channel disconnected.
-     *
-     * @param channel channel.
-     */
     void disconnected(Channel channel) throws RemotingException;
 
-    /**
-     * on message sent.
-     *
-     * @param channel channel.
-     * @param message message.
-     */
     void sent(Channel channel, Object message) throws RemotingException;
 
-    /**
-     * on message received.
-     *
-     * @param channel channel.
-     * @param message message.
-     */
     void received(Channel channel, Object message) throws RemotingException;
 
-    /**
-     * on exception caught.
-     *
-     * @param channel   channel.
-     * @param exception exception.
-     */
     void caught(Channel channel, Throwable exception) throws RemotingException;
 
 }

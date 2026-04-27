@@ -28,6 +28,11 @@ import org.apache.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 
 import java.util.concurrent.ExecutorService;
 
+/**
+ * 所有消息类型都在 I/O 线程上执行，适用于处理速度极快的业务逻辑，减少上下文的切换。
+ *
+ * @see DirectDispatcher
+ */
 public class DirectChannelHandler extends WrappedChannelHandler {
 
     public DirectChannelHandler(ChannelHandler handler, URL url) {

@@ -41,21 +41,43 @@ import static org.apache.dubbo.remoting.Constants.DEFAULT_IDLE_TIMEOUT;
 import static org.apache.dubbo.remoting.Constants.IDLE_TIMEOUT_KEY;
 
 /**
- * AbstractServer
+ * 抽象了服务端的公共逻辑
  */
 public abstract class AbstractServer extends AbstractEndpoint implements RemotingServer {
 
     protected static final String SERVER_THREAD_POOL_NAME = "DubboServerHandler";
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractServer.class);
+
+    /**
+     * Server 关联的线程池，由 {@link #executorRepository} 提供
+     */
     ExecutorService executor;
+
+    /**
+     * 本地地址
+     */
     private InetSocketAddress localAddress;
+
+    /**
+     * 绑定地址，默认与 {@link #localAddress} 一致
+     */
     private InetSocketAddress bindAddress;
+
+    /**
+     * 当前 Server 能接受的最大连接数，由 URL 提供，默认为 0，表示无限
+     */
     private int accepts;
+
     private int idleTimeout;
 
+    /**
+     * 负责管理线程池
+     */
     private ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
 
     public AbstractServer(URL url, ChannelHandler handler) throws RemotingException {
+        // 根据 URL 初始化成员变量
         super(url, handler);
         localAddress = getUrl().toInetSocketAddress();
 
@@ -68,6 +90,7 @@ public abstract class AbstractServer extends AbstractEndpoint implements Remotin
         this.accepts = url.getParameter(ACCEPTS_KEY, DEFAULT_ACCEPTS);
         this.idleTimeout = url.getParameter(IDLE_TIMEOUT_KEY, DEFAULT_IDLE_TIMEOUT);
         try {
+            // 抽象方法，完成 Server 的启动
             doOpen();
             if (logger.isInfoEnabled()) {
                 logger.info("Start " + getClass().getSimpleName() + " bind " + getBindAddress() + ", export " + getLocalAddress());

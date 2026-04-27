@@ -99,9 +99,7 @@ final class NettyChannel extends AbstractChannel {
     }
 
     /**
-     * Remove the inactive channel.
-     *
-     * @param ch netty channel
+     * 清除不活跃的 channel
      */
     static void removeChannelIfDisconnected(Channel ch) {
         if (ch != null && !ch.isActive()) {

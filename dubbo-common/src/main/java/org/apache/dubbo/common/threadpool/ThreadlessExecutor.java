@@ -30,24 +30,28 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The most important difference between this Executor and other normal Executor is that this one doesn't manage
- * any thread.
- *
- * Tasks submitted to this executor through {@link #execute(Runnable)} will not get scheduled to a specific thread, though normal executors always do the schedule.
- * Those tasks are stored in a blocking queue and will only be executed when a thread calls {@link #waitAndDrain()}, the thread executing the task
- * is exactly the same as the one calling waitAndDrain.
+ * 这个 Executor 没有管理任何线程，而是将提交的任务存放到阻塞队列中，一个线程可以调用 {@link #waitAndDrain()} 方法阻塞，如果有任务抵达，
+ * 这个线程会被唤醒并执行此任务，在 AbstractInvoker#getCallbackExecutor 中创建。
  */
 public class ThreadlessExecutor extends AbstractExecutorService {
     private static final Logger logger = LoggerFactory.getLogger(ThreadlessExecutor.class.getName());
 
+    /**
+     * 阻塞队列，用于在 I/O 线程和业务线程之间传递任务
+     */
     private final BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
 
     private ExecutorService sharedExecutor;
 
+    /**
+     * 指向请求对应的 {@link org.apache.dubbo.remoting.exchange.support.DefaultFuture DefaultFuture} 对象
+     */
     private CompletableFuture<?> waitingFuture;
 
+    /**
+     * @see #waitAndDrain()
+     */
     private boolean finished = false;
-
     private volatile boolean waiting = true;
 
     private final Object lock = new Object();
@@ -69,19 +73,14 @@ public class ThreadlessExecutor extends AbstractExecutorService {
     }
 
     /**
-     * Waits until there is a task, executes the task and all queued tasks (if there're any). The task is either a normal
-     * response or a timeout response.
+     * 等待直到获取到任务，这个任务可能是正常响应或者超时响应。
+     * <p>
+     * 通常情况下，{@link #waitAndDrain()} 只会被调用一次，一旦响应返回，{@link #waitAndDrain()} 就会返回；
+     * 之后对 {@link #waitAndDrain()} 的调用应当立刻返回。
+     * 无需担心 {@link #finished} 的线程安全性，因为对它的检查和更新都在 {@link  #waitAndDrain()} 方法中进行，
+     * 且该方法与一次 RPC 调用（单个线程）绑定，因此其调用是完全顺序性的。
      */
     public void waitAndDrain() throws InterruptedException {
-        /**
-         * Usually, {@link #waitAndDrain()} will only get called once. It blocks for the response for the first time,
-         * once the response (the task) reached and being executed waitAndDrain will return, the whole request process
-         * then finishes. Subsequent calls on {@link #waitAndDrain()} (if there're any) should return immediately.
-         *
-         * There's no need to worry that {@link #finished} is not thread-safe. Checking and updating of
-         * 'finished' only appear in waitAndDrain, since waitAndDrain is binding to one RPC call (one thread), the call
-         * of it is totally sequential.
-         */
         if (finished) {
             return;
         }

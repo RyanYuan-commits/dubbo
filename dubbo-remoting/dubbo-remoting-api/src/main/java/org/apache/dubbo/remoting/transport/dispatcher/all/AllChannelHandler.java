@@ -29,6 +29,11 @@ import org.apache.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * 所有的消息都派发到业务线程池，适用于大部分业务场景，确保 I/O 线程不被阻塞
+ *
+ * @see AllDispatcher
+ */
 public class AllChannelHandler extends WrappedChannelHandler {
 
     public AllChannelHandler(ChannelHandler handler, URL url) {
@@ -78,4 +83,5 @@ public class AllChannelHandler extends WrappedChannelHandler {
             throw new ExecutionException("caught event", channel, getClass() + " error when process caught event .", t);
         }
     }
+
 }

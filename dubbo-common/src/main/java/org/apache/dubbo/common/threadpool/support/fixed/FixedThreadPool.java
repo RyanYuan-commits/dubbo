@@ -35,7 +35,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADS_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.THREAD_NAME_KEY;
 
 /**
- * Creates a thread pool that reuses a fixed number of threads
+ * 创建一个复用固定数量线程的线程池
  *
  * @see java.util.concurrent.Executors#newFixedThreadPool(int)
  */

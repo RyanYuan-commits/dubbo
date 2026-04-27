@@ -21,7 +21,7 @@ import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.Dispatcher;
 
 /**
- * Only message receive uses the thread pool.
+ * @see MessageOnlyChannelHandler
  */
 public class MessageOnlyDispatcher implements Dispatcher {
 

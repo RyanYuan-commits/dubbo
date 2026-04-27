@@ -40,6 +40,10 @@ import static org.apache.dubbo.remoting.Constants.CONNECT_QUEUE_CAPACITY;
 import static org.apache.dubbo.remoting.Constants.CONNECT_QUEUE_WARNING_SIZE;
 import static org.apache.dubbo.remoting.Constants.DEFAULT_CONNECT_QUEUE_WARNING_SIZE;
 
+/**
+ * 对于连接建立和断开事件，提交到一个独立的线程池进行排队处理
+ * TODO: 待完善
+ */
 public class ConnectionOrderedChannelHandler extends WrappedChannelHandler {
 
     protected final ThreadPoolExecutor connectionExecutor;
@@ -106,4 +110,5 @@ public class ConnectionOrderedChannelHandler extends WrappedChannelHandler {
             logger.warn(new IllegalThreadStateException("connectionordered channel handler `queue size: " + connectionExecutor.getQueue().size() + " exceed the warning limit number :" + queuewarninglimit));
         }
     }
+
 }

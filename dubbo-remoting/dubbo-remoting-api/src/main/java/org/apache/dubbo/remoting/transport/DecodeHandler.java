@@ -26,6 +26,12 @@ import org.apache.dubbo.remoting.RemotingException;
 import org.apache.dubbo.remoting.exchange.Request;
 import org.apache.dubbo.remoting.exchange.Response;
 
+
+/**
+ * 专门处理 {@link Decodeable} 的 channel handler 实现，实现了 {@link Decodeable} 接口的类
+ * 都会提供一个 <code>decode()</code> 方法实现对自身的解码，其 <code>receive()</code> 调用该
+ * 方法进行消息的解码，然后委托给 {@link ChannelHandler handler} 处理。
+ */
 public class DecodeHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger log = LoggerFactory.getLogger(DecodeHandler.class);
@@ -62,8 +68,8 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
                 if (log.isWarnEnabled()) {
                     log.warn("Call Decodeable.decode failed: " + e.getMessage(), e);
                 }
-            } // ~ end of catch
-        } // ~ end of if
-    } // ~ end of method decode
+            }
+        }
+    }
 
 }

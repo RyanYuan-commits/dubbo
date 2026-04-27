@@ -32,27 +32,9 @@ import org.apache.dubbo.common.extension.SPI;
 @SPI("netty")
 public interface Transporter {
 
-    /**
-     * Bind a server.
-     *
-     * @param url     server url
-     * @param handler
-     * @return server
-     * @throws RemotingException
-     * @see org.apache.dubbo.remoting.Transporters#bind(URL, ChannelHandler...)
-     */
     @Adaptive({Constants.SERVER_KEY, Constants.TRANSPORTER_KEY})
     RemotingServer bind(URL url, ChannelHandler handler) throws RemotingException;
 
-    /**
-     * Connect to a server.
-     *
-     * @param url     server url
-     * @param handler
-     * @return client
-     * @throws RemotingException
-     * @see org.apache.dubbo.remoting.Transporters#connect(URL, ChannelHandler...)
-     */
     @Adaptive({Constants.CLIENT_KEY, Constants.TRANSPORTER_KEY})
     Client connect(URL url, ChannelHandler handler) throws RemotingException;
 

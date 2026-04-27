@@ -204,18 +204,13 @@ import java.nio.ByteBuffer;
 public interface ChannelBuffer extends Comparable<ChannelBuffer> {
 
     /**
-     * Returns the number of bytes (octets) this buffer can contain.
+     * 返回当前 Buffer 的字节容量
      */
     int capacity();
 
     /**
-     * Sets the {@code readerIndex} and {@code writerIndex} of this buffer to
-     * {@code 0}. This method is identical to {@link #setIndex(int, int)
-     * setIndex(0, 0)}.
-     * <p/>
-     * Please note that the behavior of this method is different from that of
-     * NIO buffer, which sets the {@code limit} to the {@code capacity} of the
-     * buffer.
+     * 将{@code readerIndex} 和 {@code writerIndex} 设置为 0，效果等价于
+     *{@link #setIndex(int, int) setIndex(0, 0)}。
      */
     void clear();
 
@@ -284,56 +279,41 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
     ChannelBufferFactory factory();
 
     /**
-     * Gets a byte at the specified absolute {@code index} in this buffer. This
-     * method does not modify {@code readerIndex} or {@code writerIndex} of this
-     * buffer.
+     * 获取缓冲区中 {@code index} 处的字节，不会修改 {@code readerIndex} 和
+     * {@code writerIndex} 的值。
      *
-     * @throws IndexOutOfBoundsException if the specified {@code index} is less
-     *                                   than {@code 0} or {@code index + 1} is
-     *                                   greater than {@code this.capacity}
+     * @throws IndexOutOfBoundsException index 越界（小于 0 或者大于 capacity - 1）
      */
     byte getByte(int index);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at the
-     * specified absolute {@code index}. This method does not modify {@code
-     * readerIndex} or {@code writerIndex} of this buffer
+     * 从指定的绝对 {@code index} 开始，将此缓冲区的数据传输到指定的目标。
+     * 此方法不会修改此缓冲区的 {@code readerIndex} 或 {@code writerIndex}。
      *
-     * @throws IndexOutOfBoundsException if the specified {@code index} is less
-     *                                   than {@code 0} or if {@code index +
-     *                                   dst.length} is greater than {@code
-     *                                   this.capacity}
+     * @throws IndexOutOfBoundsException index 越界（小于 0 或者大于 capacity - 1）
      */
     void getBytes(int index, byte[] dst);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at the
-     * specified absolute {@code index}. This method does not modify {@code
-     * readerIndex} or {@code writerIndex} of this buffer.
+     * 从 {@code index} 开始，将此缓冲区的数据传输到指定的目标数组。
+     * 此方法不会修改此缓冲区的 {@code readerIndex} 或 {@code writerIndex}。
      *
-     * @param dstIndex the first index of the destination
-     * @param length   the number of bytes to transfer
-     * @throws IndexOutOfBoundsException if the specified {@code index} is less
-     *                                   than {@code 0}, if the specified {@code
-     *                                   dstIndex} is less than {@code 0}, if
-     *                                   {@code index + length} is greater than
-     *                                   {@code this.capacity}, or if {@code
-     *                                   dstIndex + length} is greater than
-     *                                   {@code dst.length}
+     * @param dstIndex 目标数组的起始索引
+     * @param length   要传输的字节数
+     * @throws IndexOutOfBoundsException 如果指定的 {@code index} 小于 {@code 0}，
+     *                                   或者指定的 {@code dstIndex} 小于 {@code 0}，
+     *                                   或者 {@code index + length} 大于 {@code this.capacity}，
+     *                                   或者 {@code dstIndex + length} 大于 {@code dst.length}
      */
     void getBytes(int index, byte[] dst, int dstIndex, int length);
 
     /**
-     * Transfers this buffer's data to the specified destination starting at the
-     * specified absolute {@code index} until the destination's position reaches
-     * its limit. This method does not modify {@code readerIndex} or {@code
-     * writerIndex} of this buffer while the destination's {@code position} will
-     * be increased.
+     * 从 {@code index} 开始，将此缓冲区的数据传输到指定的目标 ByteBuffer，
+     * 直到目标的 position 达到其 limit。此方法不会修改此缓冲区的 {@code readerIndex}
+     * 或 {@code writerIndex}，但会增加目标 ByteBuffer 的 {@code position}。
      *
-     * @throws IndexOutOfBoundsException if the specified {@code index} is less
-     *                                   than {@code 0} or if {@code index +
-     *                                   dst.remaining()} is greater than {@code
-     *                                   this.capacity}
+     * @throws IndexOutOfBoundsException 如果指定的 {@code index} 小于 {@code 0}，
+     *                                   或者 {@code index + dst.remaining()} 大于 {@code this.capacity}
      */
     void getBytes(int index, ByteBuffer dst);
 
@@ -948,4 +928,5 @@ public interface ChannelBuffer extends Comparable<ChannelBuffer> {
      *                                       array
      */
     int arrayOffset();
+
 }

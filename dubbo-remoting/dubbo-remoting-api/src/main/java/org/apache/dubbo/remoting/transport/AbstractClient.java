@@ -45,17 +45,29 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADPOOL_KEY;
 public abstract class AbstractClient extends AbstractEndpoint implements Client {
 
     protected static final String CLIENT_THREAD_POOL_NAME = "DubboClientHandler";
+
     private static final Logger logger = LoggerFactory.getLogger(AbstractClient.class);
+
+    /**
+     * 在 client 底层进行连接、断开、重连时，需要获取锁进行同步
+     */
     private final Lock connectLock = new ReentrantLock();
+
+    /**
+     * 发送数据前，会检查连接是否断开，此参数决定断开时是否重连
+     */
     private final boolean needReconnect;
+
+    /**
+     * client 关联的线程池
+     */
     protected volatile ExecutorService executor;
+
     private ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
 
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
-
         needReconnect = url.getParameter(Constants.SEND_RECONNECT_KEY, false);
-
         initExecutor(url);
 
         try {
@@ -66,8 +78,8 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
                     "Failed to start " + getClass().getSimpleName() + " " + NetUtils.getLocalAddress()
                             + " connect to the server " + getRemoteAddress() + ", cause: " + t.getMessage(), t);
         }
+
         try {
-            // connect.
             connect();
             if (logger.isInfoEnabled()) {
                 logger.info("Start " + getClass().getSimpleName() + " " + NetUtils.getLocalAddress() + " connect to the server " + getRemoteAddress());
@@ -179,7 +191,6 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
     }
 
     protected void connect() throws RemotingException {
-
         connectLock.lock();
 
         try {

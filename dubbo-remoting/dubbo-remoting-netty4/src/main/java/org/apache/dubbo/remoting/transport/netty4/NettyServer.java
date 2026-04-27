@@ -54,17 +54,20 @@ import static org.apache.dubbo.common.constants.CommonConstants.SSL_ENABLED_KEY;
 public class NettyServer extends AbstractServer implements RemotingServer {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyServer.class);
+
     /**
-     * the cache for alive worker channel.
+     * 缓存活跃的 worker channel
      * <ip:port, dubbo channel>
      */
     private Map<String, Channel> channels;
+
     /**
-     * netty server bootstrap.
+     * netty server 启动类
      */
     private ServerBootstrap bootstrap;
+
     /**
-     * the boss channel that receive connections and dispatch these to worker channel.
+     * boss channel，from bootstrap.bind()
      */
 	private io.netty.channel.Channel channel;
 
@@ -72,16 +75,11 @@ public class NettyServer extends AbstractServer implements RemotingServer {
     private EventLoopGroup workerGroup;
 
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
-        // you can customize name and type of client thread pool by THREAD_NAME_KEY and THREADPOOL_KEY in CommonConstants.
-        // the handler will be wrapped: MultiMessageHandler->HeartbeatHandler->handler
+        // 你可以自定义线程池的名称和类型通过 CommonConstants.THREAD_NAME_KEY 和 CommonConstants.THREADPOOL_KEY
+        // 参数中的 handler 会被包装：MultiMessageHandler -> HeartbeatHandler -> handler (HeaderExchangeHandler）
         super(ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME), ChannelHandlers.wrap(handler, url));
     }
 
-    /**
-     * Init and start netty server
-     *
-     * @throws Throwable
-     */
     @Override
     protected void doOpen() throws Throwable {
         bootstrap = new ServerBootstrap();
@@ -109,6 +107,8 @@ public class NettyServer extends AbstractServer implements RemotingServer {
                             ch.pipeline().addLast("negotiation",
                                     SslHandlerInitializer.sslServerHandler(getUrl(), nettyServerHandler));
                         }
+                        // inbound: decode -> idle handler -> server handler
+                        // outbound: server handler -> idle handler -> encode
                         ch.pipeline()
                                 .addLast("decoder", adapter.getDecoder())
                                 .addLast("encoder", adapter.getEncoder())
@@ -116,11 +116,10 @@ public class NettyServer extends AbstractServer implements RemotingServer {
                                 .addLast("handler", nettyServerHandler);
                     }
                 });
-        // bind
+
         ChannelFuture channelFuture = bootstrap.bind(getBindAddress());
         channelFuture.syncUninterruptibly();
         channel = channelFuture.channel();
-
     }
 
     @Override

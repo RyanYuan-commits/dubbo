@@ -29,6 +29,11 @@ import org.apache.dubbo.remoting.transport.dispatcher.WrappedChannelHandler;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 
+/**
+ * 只有请求、响应消息派发到业务线程池，其他（连接、断开、心跳）不派发，在 I/O 线程中处理
+ *
+ * @see MessageOnlyDispatcher
+ */
 public class MessageOnlyChannelHandler extends WrappedChannelHandler {
 
     public MessageOnlyChannelHandler(ChannelHandler handler, URL url) {

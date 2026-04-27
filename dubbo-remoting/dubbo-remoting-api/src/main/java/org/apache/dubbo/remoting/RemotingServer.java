@@ -32,26 +32,18 @@ import java.util.Collection;
  */
 public interface RemotingServer extends Endpoint, Resetable, IdleSensible {
 
-    /**
-     * is bound.
-     *
-     * @return bound
-     */
     boolean isBound();
 
     /**
      * 获取由 Client 发起的多个 Channel
-     * @see Client
      *
+     * @see Client
      * @return channels
      */
     Collection<Channel> getChannels();
 
     /**
-     * get channel.
-     *
-     * @param remoteAddress
-     * @return channel
+     * 通过 ip + port 的方式获取 Channel
      */
     Channel getChannel(InetSocketAddress remoteAddress);
 

@@ -31,60 +31,40 @@ import java.net.InetSocketAddress;
  */
 public interface Endpoint {
 
-    /**
-     * get url.
-     *
-     * @return url
-     */
     URL getUrl();
 
     /**
-     * get channel handler.
-     *
-     * @return channel handler
+     * 获取与底层 Channel 关联的 ChannelHandler
      */
     ChannelHandler getChannelHandler();
 
-    /**
-     * get local address.
-     *
-     * @return local address.
-     */
     InetSocketAddress getLocalAddress();
 
     /**
-     * 用于向该 endpoint 发送消息
-     *
-     * @param message
-     * @throws RemotingException
+     * 发送消息
      */
     void send(Object message) throws RemotingException;
 
     /**
-     * 用于向该 endpoint 发送消息
+     * 发送消息
      *
-     * @param message
-     * @param sent    already sent to socket?
+     * @param message 消息对象
+     * @param sent 是否阻塞等待消息写入完成
      */
     void send(Object message, boolean sent) throws RemotingException;
 
     /**
-     * close the channel.
+     * 关闭 Channel
      */
     void close();
 
     /**
-     * Graceful close the channel.
+     * 优雅关闭 Channel
      */
     void close(int timeout);
 
     void startClose();
 
-    /**
-     * is closed.
-     *
-     * @return closed
-     */
     boolean isClosed();
 
 }

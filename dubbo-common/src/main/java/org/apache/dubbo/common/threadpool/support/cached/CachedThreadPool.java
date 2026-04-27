@@ -38,8 +38,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.THREADS_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.THREAD_NAME_KEY;
 
 /**
- * This thread pool is self-tuned. Thread will be recycled after idle for one minute, and new thread will be created for
- * the upcoming request.
+ * 该线程池具备自调节功能。线程在空闲一分钟后将被回收，并为即将到来的请求创建新线程。
  *
  * @see java.util.concurrent.Executors#newCachedThreadPool()
  */
@@ -58,4 +57,5 @@ public class CachedThreadPool implements ThreadPool {
                                 : new LinkedBlockingQueue<Runnable>(queues)),
                 new NamedInternalThreadFactory(name, true), new AbortPolicyWithReport(name, url));
     }
+
 }

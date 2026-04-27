@@ -22,6 +22,9 @@ import org.apache.dubbo.remoting.buffer.ChannelBuffer;
 
 import java.io.IOException;
 
+/**
+ * 专门负责编解码功能的 ChannelHandler
+ */
 @SPI
 public interface Codec2 {
 
@@ -30,7 +33,6 @@ public interface Codec2 {
 
     @Adaptive({Constants.CODEC_KEY})
     Object decode(Channel channel, ChannelBuffer buffer) throws IOException;
-
 
     enum DecodeResult {
         NEED_MORE_INPUT, SKIP_SOME_INPUT

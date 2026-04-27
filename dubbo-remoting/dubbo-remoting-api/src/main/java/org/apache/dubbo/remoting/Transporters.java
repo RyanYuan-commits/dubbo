@@ -23,13 +23,11 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerAdapter;
 import org.apache.dubbo.remoting.transport.ChannelHandlerDispatcher;
 
 /**
- * Transporter facade. (API, Static, ThreadSafe)
- * Transporter 门面类
+ * Transporter 门面类，封装了 {@link Transporter} 的创建以及对 ChannelHandler 的处理
  */
 public class Transporters {
 
     static {
-        // check duplicate jar package
         Version.checkDuplicate(Transporters.class);
         Version.checkDuplicate(RemotingException.class);
     }

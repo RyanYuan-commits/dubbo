@@ -31,6 +31,14 @@ import org.apache.dubbo.remoting.transport.ChannelHandlerDelegate;
 
 import java.util.concurrent.ExecutorService;
 
+/**
+ * 用于实现 “消息派发机制” 的 channel handler 的父类，消息派发策略共有五种实现，
+ * 用于决定将什么消息从 IO 线程派发到业务线程进行。
+ * <p>
+ * 每个 “消息派发” channel handler 由对应一个 {@link org.apache.dubbo.remoting.Dispatcher Dispatcher} 创建，
+ * {@link org.apache.dubbo.remoting.Dispatcher Dispatcher} 根据 URL 指定的策略创建 channel handler，将其放置在
+ * handler 链路中，当消息流转到该 channel handler 时，根据消息类型执行对应的派发策略。
+ */
 public class WrappedChannelHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
@@ -99,19 +107,18 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
     }
 
     /**
-     * Currently, this method is mainly customized to facilitate the thread model on consumer side.
-     * 1. Use ThreadlessExecutor, aka., delegate callback directly to the thread initiating the call.
-     * 2. Use shared executor to execute the callback.
-     *
-     * @param msg
-     * @return
+     * 目前，这个方法主要用于定制消费者端的线程模型，主要包含两种模式：
+     * <ol>
+     *     <li>使用 ThreadlessExecutor：使用发起调用的原始线程来知悉行回调逻辑</li>
+     *     <li>使用 shared executor：使用共享线程池来执行回调逻辑</li>
+     * </ol>
      */
     public ExecutorService getPreferredExecutorService(Object msg) {
         if (msg instanceof Response) {
             Response response = (Response) msg;
             DefaultFuture responseFuture = DefaultFuture.getFuture(response.getId());
-            // a typical scenario is the response returned after timeout, the timeout response may has completed the future
             if (responseFuture == null) {
+                // 典型场景是：响应在超时之后才返回，而此时超时的处理逻辑可能已经完成了该 Future（异步状态对象）。
                 return getSharedExecutorService();
             } else {
                 ExecutorService executor = responseFuture.getExecutor();
@@ -125,11 +132,6 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
         }
     }
 
-    /**
-     * get the shared executor for current Server or Client
-     *
-     * @return
-     */
     public ExecutorService getSharedExecutorService() {
         ExecutorRepository executorRepository =
                 ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();

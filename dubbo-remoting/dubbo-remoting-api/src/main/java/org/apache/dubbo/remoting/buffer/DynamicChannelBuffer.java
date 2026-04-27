@@ -22,6 +22,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
+/**
+ * 装饰器 Buffer，可以为其他 ChannelBuffer 添加动态拓展容量的功能。
+ * <p>
+ * 核心方法：{@link #ensureWritableBytes(int)}
+ */
 public class DynamicChannelBuffer extends AbstractChannelBuffer {
 
     private final ChannelBufferFactory factory;

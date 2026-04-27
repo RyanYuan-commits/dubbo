@@ -37,9 +37,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.SIDE_KEY;
 import static org.apache.dubbo.common.constants.CommonConstants.THREADS_KEY;
 
 /**
- * Consider implementing {@code Licycle} to enable executors shutdown when the process stops.
+ * Dubbo 线程池管理类的默认实现
  */
 public class DefaultExecutorRepository implements ExecutorRepository {
+
     private static final Logger logger = LoggerFactory.getLogger(DefaultExecutorRepository.class);
 
     private int DEFAULT_SCHEDULER_SIZE = Runtime.getRuntime().availableProcessors();
@@ -52,23 +53,18 @@ public class DefaultExecutorRepository implements ExecutorRepository {
 
     private ScheduledExecutorService reconnectScheduledExecutor;
 
+    /**
+     * 缓存已有的线程池，第一层 key 表示线程池属于 Client 端还是 Server 端，
+     * 第二层 key 表示线程池关联服务的端口。
+     */
     private ConcurrentMap<String, ConcurrentMap<Integer, ExecutorService>> data = new ConcurrentHashMap<>();
 
     public DefaultExecutorRepository() {
-//        for (int i = 0; i < DEFAULT_SCHEDULER_SIZE; i++) {
-//            ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Dubbo-framework-scheduler"));
-//            scheduledExecutors.addItem(scheduler);
-//        }
-//
-//        reconnectScheduledExecutor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Dubbo-reconnect-scheduler"));
         serviceExporterExecutor = Executors.newScheduledThreadPool(1, new NamedThreadFactory("Dubbo-exporter-scheduler"));
     }
 
     /**
-     * Get called when the server or client instance initiating.
-     *
-     * @param url
-     * @return
+     * client 或者 server 初始化时调用
      */
     public synchronized ExecutorService createExecutorIfAbsent(URL url) {
         String componentKey = EXECUTOR_SERVICE_COMPONENT_KEY;
@@ -78,7 +74,8 @@ public class DefaultExecutorRepository implements ExecutorRepository {
         Map<Integer, ExecutorService> executors = data.computeIfAbsent(componentKey, k -> new ConcurrentHashMap<>());
         Integer portKey = url.getPort();
         ExecutorService executor = executors.computeIfAbsent(portKey, k -> createExecutor(url));
-        // If executor has been shut down, create a new one
+
+        // 如果 executor 被关闭，重新创建
         if (executor.isShutdown() || executor.isTerminated()) {
             executors.remove(portKey);
             executor = createExecutor(url);
@@ -94,11 +91,8 @@ public class DefaultExecutorRepository implements ExecutorRepository {
         }
         Map<Integer, ExecutorService> executors = data.get(componentKey);
 
-        /**
-         * It's guaranteed that this method is called after {@link #createExecutorIfAbsent(URL)}, so data should already
-         * have Executor instances generated and stored.
-         */
         if (executors == null) {
+            // 确保该方法在 createExecutorIfAbsent 方法之后被调用
             logger.warn("No available executors, this is not expected, framework should call createExecutorIfAbsent first " +
                     "before coming to here.");
             return null;

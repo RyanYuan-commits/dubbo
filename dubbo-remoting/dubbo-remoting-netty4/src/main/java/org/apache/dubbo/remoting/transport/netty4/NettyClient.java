@@ -66,19 +66,17 @@ public class NettyClient extends AbstractClient {
     private Bootstrap bootstrap;
 
     /**
-     * current channel. Each successful invocation of {@link NettyClient#doConnect()} will
-     * replace this with new channel and close old channel.
-     * <b>volatile, please copy reference to use.</b>
+     * 当前的 client channel，每当 {@link #doConnect()} 方法执行成功后，会将新的 channel 赋值给
+     * 这个变量，并关闭旧的 channel。
+     * <b> 变量是 volatile，需要 copy reference 使用 </b>
      */
     private volatile Channel channel;
 
     /**
-     * The constructor of NettyClient.
-     * It wil init and start netty.
+     * 初始化并启动 netty
      */
     public NettyClient(final URL url, final ChannelHandler handler) throws RemotingException {
-    	// you can customize name and type of client thread pool by THREAD_NAME_KEY and THREADPOOL_KEY in CommonConstants.
-    	// the handler will be wrapped: MultiMessageHandler->HeartbeatHandler->handler
+    	// handler 会被包装: MultiMessageHandler->HeartbeatHandler->handler
     	super(url, wrapChannelHandler(url, handler));
     }
 
@@ -90,6 +88,7 @@ public class NettyClient extends AbstractClient {
     @Override
     protected void doOpen() throws Throwable {
         final NettyClientHandler nettyClientHandler = new NettyClientHandler(getUrl(), this);
+
         bootstrap = new Bootstrap();
         bootstrap.group(NIO_EVENT_LOOP_GROUP)
                 .option(ChannelOption.SO_KEEPALIVE, true)
@@ -98,9 +97,10 @@ public class NettyClient extends AbstractClient {
                 //.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, getTimeout())
                 .channel(socketChannelClass());
 
+        // 设置超时时间
         bootstrap.option(ChannelOption.CONNECT_TIMEOUT_MILLIS, Math.max(3000, getConnectTimeout()));
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
 
+        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             protected void initChannel(SocketChannel ch) throws Exception {
                 int heartbeatInterval = UrlUtils.getHeartbeat(getUrl());

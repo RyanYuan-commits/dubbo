@@ -21,7 +21,7 @@ import org.apache.dubbo.remoting.ChannelHandler;
 import org.apache.dubbo.remoting.Dispatcher;
 
 /**
- * Direct dispatcher
+ * @see DirectChannelHandler
  */
 public class DirectDispatcher implements Dispatcher {
 

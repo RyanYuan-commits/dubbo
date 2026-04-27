@@ -29,6 +29,12 @@ import org.apache.dubbo.remoting.transport.AbstractChannelHandlerDelegate;
 
 import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
+/**
+ * 专门处理心跳请求的 channel handler 实现，在收到心跳请求时，会生成相应的心跳
+ * 响应并返回；在收到心跳响应时，会打印响应的日志。
+ *
+ * @see HeartbeatHandler#received(Channel, Object)
+ */
 public class HeartbeatHandler extends AbstractChannelHandlerDelegate {
 
     private static final Logger logger = LoggerFactory.getLogger(HeartbeatHandler.class);
