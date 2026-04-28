@@ -48,8 +48,16 @@ public class DefaultFuture extends CompletableFuture<Object> {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultFuture.class);
 
+    /**
+     * 管理请求与 Channel 之间的关联关系
+     * <request_id: Channel>
+     */
     private static final Map<Long, Channel> CHANNELS = new ConcurrentHashMap<>();
 
+    /**
+     * 管理请求与 DefaultFuture 之间的关联关系
+     * <request_id: DefaultFuture>
+     */
     private static final Map<Long, DefaultFuture> FUTURES = new ConcurrentHashMap<>();
 
     public static final Timer TIME_OUT_TIMER = new HashedWheelTimer(
@@ -57,15 +65,44 @@ public class DefaultFuture extends CompletableFuture<Object> {
             30,
             TimeUnit.MILLISECONDS);
 
-    // invoke id.
+    /**
+     * 请求 ID
+     */
     private final Long id;
+
+    /**
+     * 发送请求的 Channel
+     */
     private final Channel channel;
+
+    /**
+     * 请求对象
+     */
     private final Request request;
+
+    /**
+     * 超时时间
+     */
     private final int timeout;
+
+    /**
+     * 当前 DefaultFuture 创建的时间
+     */
     private final long start = System.currentTimeMillis();
+
+    /**
+     * 请求发送的时间
+     */
     private volatile long sent;
+
+    /**
+     * 定时任务，其到期时表示对端响应超时
+     */
     private Timeout timeoutCheckTask;
 
+    /**
+     * 请求关联的线程池
+     */
     private ExecutorService executor;
 
     public ExecutorService getExecutor() {
@@ -87,7 +124,7 @@ public class DefaultFuture extends CompletableFuture<Object> {
     }
 
     /**
-     * check time out of the future
+     * 通过时间轮创建一个超时检测任务，超时后执行 {@link TimeoutCheckTask#run(Timeout)}
      */
     private static void timeoutCheck(DefaultFuture future) {
         TimeoutCheckTask task = new TimeoutCheckTask(future.getId());
@@ -95,9 +132,7 @@ public class DefaultFuture extends CompletableFuture<Object> {
     }
 
     /**
-     * init a DefaultFuture
-     * 1.init a DefaultFuture
-     * 2.timeout check
+     * 初始化 DefaultFuture 并构建超时任务
      *
      * @param channel channel
      * @param request the request
@@ -111,7 +146,7 @@ public class DefaultFuture extends CompletableFuture<Object> {
         if (executor instanceof ThreadlessExecutor) {
             ((ThreadlessExecutor) executor).setWaitingFuture(future);
         }
-        // timeout check
+        // 超时检测
         timeoutCheck(future);
         return future;
     }
@@ -289,13 +324,15 @@ public class DefaultFuture extends CompletableFuture<Object> {
         }
 
         private void notifyTimeout(DefaultFuture future) {
-            // create exception response.
+            // 创建异常 Response
             Response timeoutResponse = new Response(future.getId());
-            // set timeout status.
+            // 设置超时状态
             timeoutResponse.setStatus(future.isSent() ? Response.SERVER_TIMEOUT : Response.CLIENT_TIMEOUT);
             timeoutResponse.setErrorMessage(future.getTimeoutMessage(true));
-            // handle response.
+            // 处理 response
             DefaultFuture.received(future.getChannel(), timeoutResponse, true);
         }
+
     }
+
 }

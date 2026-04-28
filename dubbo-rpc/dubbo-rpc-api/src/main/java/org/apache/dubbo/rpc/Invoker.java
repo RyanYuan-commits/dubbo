@@ -22,20 +22,20 @@ import org.apache.dubbo.common.Node;
  * Invoker. (API/SPI, Prototype, ThreadSafe)
  *
  * @see org.apache.dubbo.rpc.Protocol#refer(Class, org.apache.dubbo.common.URL)
- * @see org.apache.dubbo.rpc.InvokerListener
+ * @see org.apache.dubbo.rpc.InvokerListener 监听 Consumer 引用服务时触发的事件
  * @see org.apache.dubbo.rpc.protocol.AbstractInvoker
  */
 public interface Invoker<T> extends Node {
 
     /**
-     * get service interface.
+     * 服务接口
      *
      * @return service interface.
      */
     Class<T> getInterface();
 
     /**
-     * invoke.
+     * 进行一次调用
      *
      * @param invocation
      * @return result

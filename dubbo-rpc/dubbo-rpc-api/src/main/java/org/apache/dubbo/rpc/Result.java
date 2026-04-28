@@ -31,14 +31,15 @@ import java.util.function.Function;
 
 
 /**
+ * 一次调用的返回值，是 {@link Invoker#invoke(Invocation)} 方法的返回值
  * (API, Prototype, NonThreadSafe)
- *
- * An RPC {@link Result}.
- *
- * Known implementations are:
- * 1. {@link AsyncRpcResult}, it's a {@link CompletionStage} whose underlying value signifies the return value of an RPC call.
- * 2. {@link AppResponse}, it inevitably inherits {@link CompletionStage} and {@link Future}, but you should never treat AppResponse as a type of Future,
- *    instead, it is a normal concrete type.
+ * <p>
+ * 目前的具体实现有：
+ * <ol>
+ *     <li> {@link AsyncRpcResult}：它是一个 {@link CompletionStage}，其底层值表示一次 RPC 调用的返回结果。 </li>
+ *     <li> {@link AppResponse}：它虽然不可避免地继承了 {@link CompletionStage} 和 {@link Future}，
+ *          但你绝不应该把 AppResponse 当作一种 Future 异步对象来使用，相反，它只是一个普通的具体类型。 </li>
+ * </ol>
  *
  * @serial Don't change the class name and package name.
  * @see org.apache.dubbo.rpc.Invoker#invoke(Invocation)
@@ -47,118 +48,76 @@ import java.util.function.Function;
 public interface Result extends Serializable {
 
     /**
-     * Get invoke result.
+     * 获取此次调用的返回值
      *
      * @return result. if no result return null.
      */
     Object getValue();
 
+    /**
+     * 设置此次调用的返回值
+     *
+     * @param value result. if no result return null.
+     */
     void setValue(Object value);
 
     /**
-     * Get exception.
+     * 获取本次调用的异常
      *
      * @return exception. if no exception return null.
      */
     Throwable getException();
 
+    /**
+     * 设置此次调用的异常
+     *
+     * @param t exception
+     */
     void setException(Throwable t);
 
     /**
-     * Has exception.
+     * 判断是否有异常
      *
      * @return has exception.
      */
     boolean hasException();
 
     /**
-     * Recreate.
-     * <p>
-     * <code>
-     * if (hasException()) {
-     * throw getException();
-     * } else {
-     * return getValue();
-     * }
-     * </code>
+     * 复合操作，如果本次调用有异常，直接抛出异常，如果没有，获取结果
      *
      * @return result.
      * @throws if has exception throw it.
      */
     Object recreate() throws Throwable;
 
-    /**
-     * get attachments.
-     *
-     * @return attachments.
-     */
     Map<String, String> getAttachments();
 
-    /**
-     * get attachments.
-     *
-     * @return attachments.
-     */
     @Experimental("Experiment api for supporting Object transmission")
     Map<String, Object> getObjectAttachments();
 
-    /**
-     * Add the specified map to existing attachments in this instance.
-     *
-     * @param map
-     */
     void addAttachments(Map<String, String> map);
 
-    /**
-     * Add the specified map to existing attachments in this instance.
-     *
-     * @param map
-     */
     @Experimental("Experiment api for supporting Object transmission")
     void addObjectAttachments(Map<String, Object> map);
 
     /**
-     * Replace the existing attachments with the specified param.
-     *
-     * @param map
+     * 使用 map 替换现有的 attachments
      */
     void setAttachments(Map<String, String> map);
 
     /**
-     * Replace the existing attachments with the specified param.
-     *
-     * @param map
+     * 使用 map 替换现有的 attachments
      */
     @Experimental("Experiment api for supporting Object transmission")
     void setObjectAttachments(Map<String, Object> map);
 
-    /**
-     * get attachment by key.
-     *
-     * @return attachment value.
-     */
     String getAttachment(String key);
 
-    /**
-     * get attachment by key.
-     *
-     * @return attachment value.
-     */
     @Experimental("Experiment api for supporting Object transmission")
     Object getObjectAttachment(String key);
 
-    /**
-     * get attachment by key with default value.
-     *
-     * @return attachment value.
-     */
     String getAttachment(String key, String defaultValue);
 
-    /**
-     * get attachment by key with default value.
-     *
-     * @return attachment value.
-     */
     @Experimental("Experiment api for supporting Object transmission")
     Object getObjectAttachment(String key, Object defaultValue);
 
@@ -171,13 +130,10 @@ public interface Result extends Serializable {
     void setObjectAttachment(String key, Object value);
 
     /**
-     * Add a callback which can be triggered when the RPC call finishes.
+     * 添加一个回调，当RPC调用完成时，会触发这里添加的回调。
      * <p>
-     * Just as the method name implies, this method will guarantee the callback being triggered under the same context as when the call was started,
-     * see implementation in {@link Result#whenCompleteWithContext(BiConsumer)}
-     *
-     * @param fn
-     * @return
+     * 正如方法名所暗示的，该方法将确保回调函数在与发起调用时完全相同的上下文环境中被触发。
+     * 具体实现请参见 {@link Result#whenCompleteWithContext(BiConsumer)}。
      */
     Result whenCompleteWithContext(BiConsumer<Result, Throwable> fn);
 

@@ -42,10 +42,24 @@ import static org.apache.dubbo.remoting.utils.UrlUtils.getIdleTimeout;
 
 /**
  * DefaultMessageClient
+ * client 对象的装饰器，为其添加了两个功能：
+ * <ol>
+ *     <li>通过定时发送心跳消息，维持与 Server 的长连接状态</li>
+ *     <li>通过定时检查连接状态，实现故障掉线后的重连</li>
+ * </ol>
  */
 public class HeaderExchangeClient implements ExchangeClient {
 
+    /**
+     * 被修饰的 Client 对象，HeaderExchangeClient 对 Client 接口的实现
+     * 都委托给了这个对象
+     */
     private final Client client;
+
+    /**
+     * Client 与 Server 之间建立的连接，HeaderExchangeClient 对 ExchangeChannel
+     * 接口的实现都委托给了这个对象
+     */
     private final ExchangeChannel channel;
 
     private static final HashedWheelTimer IDLE_CHECK_TIMER = new HashedWheelTimer(
@@ -53,6 +67,12 @@ public class HeaderExchangeClient implements ExchangeClient {
     private HeartbeatTimerTask heartBeatTimerTask;
     private ReconnectTimerTask reconnectTimerTask;
 
+    /**
+     * 构造函数
+     *
+     * @param client 被封装的 Transport 层的 Client 对象
+     * @param startTimer 是否开启心跳定时任务和重联定时任务
+     */
     public HeaderExchangeClient(Client client, boolean startTimer) {
         Assert.notNull(client, "Client can't be null");
         this.client = client;
@@ -188,9 +208,14 @@ public class HeaderExchangeClient implements ExchangeClient {
 
     private void startHeartBeatTask(URL url) {
         if (!client.canHandleIdle()) {
+            // Client 具体实现决定是否开启心跳任务
             AbstractTimerTask.ChannelProvider cp = () -> Collections.singletonList(HeaderExchangeClient.this);
+
+            // 计算心跳间隔，最小间隔不能低于 1s
             int heartbeat = getHeartbeat(url);
             long heartbeatTick = calculateLeastDuration(heartbeat);
+
+            // 创建心跳任务，提交到时间轮中执行
             this.heartBeatTimerTask = new HeartbeatTimerTask(cp, heartbeatTick, heartbeat);
             IDLE_CHECK_TIMER.newTimeout(heartBeatTimerTask, heartbeatTick, TimeUnit.MILLISECONDS);
         }
@@ -217,7 +242,7 @@ public class HeaderExchangeClient implements ExchangeClient {
     }
 
     /**
-     * Each interval cannot be less than 1000ms.
+     * 间隔不能小于 1000ms
      */
     private long calculateLeastDuration(int time) {
         if (time / HEARTBEAT_CHECK_TICK <= 0) {

@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
+ * 抽象了一次 RPC 调用的目标服务和方法信息、相关参数信息、具体参数值和一些附加信息。
  * Invocation. (API, Prototype, NonThreadSafe)
  *
  * @serial Don't change the class name and package name.
@@ -30,10 +31,15 @@ import java.util.stream.Stream;
  */
 public interface Invocation {
 
+    /**
+     * 调用 Service 的唯一标识
+     *
+     * @return service unique name
+     */
     String getTargetServiceUniqueName();
 
     /**
-     * get method name.
+     * 调用的方法名称
      *
      * @return method name.
      * @serial
@@ -42,13 +48,14 @@ public interface Invocation {
 
 
     /**
-     * get the interface name
-     * @return
+     * 调用的服务名称
+     *
+     * @return interface name
      */
     String getServiceName();
 
     /**
-     * get parameter types.
+     * 参数类型列表
      *
      * @return parameter types.
      * @serial
@@ -56,7 +63,7 @@ public interface Invocation {
     Class<?>[] getParameterTypes();
 
     /**
-     * get parameter's signature, string representation of parameter types.
+     * 参数签名集合，使用 String 表示的参数类型
      *
      * @return parameter's signature
      */
@@ -67,7 +74,7 @@ public interface Invocation {
     }
 
     /**
-     * get arguments.
+     * 此次调用的具体参数值
      *
      * @return arguments.
      * @serial
@@ -75,7 +82,7 @@ public interface Invocation {
     Object[] getArguments();
 
     /**
-     * get attachments.
+     * Invocation 可以携带一些 K-V 信息，一起传递给 Provider
      *
      * @return attachments.
      * @serial
@@ -101,30 +108,18 @@ public interface Invocation {
     @Experimental("Experiment api for supporting Object transmission")
     void setObjectAttachmentIfAbsent(String key, Object value);
 
-    /**
-     * get attachment by key.
-     *
-     * @return attachment value.
-     * @serial
-     */
     String getAttachment(String key);
 
     @Experimental("Experiment api for supporting Object transmission")
     Object getObjectAttachment(String key);
 
-    /**
-     * get attachment by key with default value.
-     *
-     * @return attachment value.
-     * @serial
-     */
     String getAttachment(String key, String defaultValue);
 
     @Experimental("Experiment api for supporting Object transmission")
     Object getObjectAttachment(String key, Object defaultValue);
 
     /**
-     * get the invoker in current context.
+     * 此次调用关联的 Invoker 对象
      *
      * @return invoker.
      * @transient

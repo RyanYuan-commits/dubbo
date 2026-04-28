@@ -61,4 +61,5 @@ public class HeartbeatTimerTask extends AbstractTimerTask {
             logger.warn("Exception when heartbeat to remote channel " + channel.getRemoteAddress(), t);
         }
     }
+
 }

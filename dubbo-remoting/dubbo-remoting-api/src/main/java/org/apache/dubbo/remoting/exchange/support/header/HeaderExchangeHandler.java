@@ -40,12 +40,16 @@ import static org.apache.dubbo.common.constants.CommonConstants.READONLY_EVENT;
 
 
 /**
- * ExchangeReceiver
+ * ExchangeHandler 装饰器
+ * 上层实现 ExchangeHandler -> 通过 HeaderExchangeHandler 修饰 -> Transport 层 ChannelHandler 再封装
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(HeaderExchangeHandler.class);
 
+    /**
+     * 上层通过实现 ExchangeHandler 接口，封装其功能
+     */
     private final ExchangeHandler handler;
 
     public HeaderExchangeHandler(ExchangeHandler handler) {
@@ -78,6 +82,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     void handleRequest(final ExchangeChannel channel, Request req) throws RemotingException {
         Response res = new Response(req.getId(), req.getVersion());
         if (req.isBroken()) {
+            // 处理解码失败的请求
             Object data = req.getData();
 
             String msg;
@@ -97,6 +102,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
         // find handler by message class.
         Object msg = req.getData();
         try {
+            // 交给上层（一般是 Protocol 层）的 ExchangeHandler 处理
             CompletionStage<Object> future = handler.reply(channel, msg);
             future.whenComplete((appResult, t) -> {
                 try {
@@ -166,12 +172,13 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
     public void received(Channel channel, Object message) throws RemotingException {
         final ExchangeChannel exchangeChannel = HeaderExchangeChannel.getOrAddChannel(channel);
         if (message instanceof Request) {
-            // handle request.
             Request request = (Request) message;
             if (request.isEvent()) {
+                // 只读请求
                 handlerEvent(channel, request);
             } else {
                 if (request.isTwoWay()) {
+                    // 双向请求
                     handleRequest(exchangeChannel, request);
                 } else {
                     handler.received(exchangeChannel, request.getData());

@@ -16,6 +16,7 @@
  */
 package org.apache.dubbo.remoting.transport.netty4;
 
+import io.netty.channel.*;
 import org.apache.dubbo.common.URL;
 import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.logger.Logger;
@@ -30,11 +31,6 @@ import org.apache.dubbo.remoting.utils.UrlUtils;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.EventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.proxy.Socks5ProxyHandler;
 import io.netty.handler.timeout.IdleStateHandler;
@@ -52,6 +48,7 @@ import static org.apache.dubbo.remoting.transport.netty4.NettyEventLoopFactory.s
 public class NettyClient extends AbstractClient {
 
     private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
+
     /**
      * netty client bootstrap
      */
@@ -210,8 +207,16 @@ public class NettyClient extends AbstractClient {
         return channel;
     }
 
+    /**
+     * 当前 Client 可以自主处理空闲连接
+     * <p>
+     * 处理逻辑：{@link NettyClientHandler#userEventTriggered(ChannelHandlerContext, Object)}
+     *
+     * @return true
+     */
     @Override
     public boolean canHandleIdle() {
         return true;
     }
+
 }

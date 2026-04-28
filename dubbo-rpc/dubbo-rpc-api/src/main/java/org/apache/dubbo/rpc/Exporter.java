@@ -16,28 +16,28 @@
  */
 package org.apache.dubbo.rpc;
 
+import org.apache.dubbo.common.Node;
+
 /**
+ * 业务接口的实现会被包装为 {@link org.apache.dubbo.rpc.proxy.AbstractProxyInvoker} 对象，然后由 Exporter 暴露出去。
  * Exporter. (API/SPI, Prototype, ThreadSafe)
  *
  * @see org.apache.dubbo.rpc.Protocol#export(Invoker)
- * @see org.apache.dubbo.rpc.ExporterListener
+ * @see org.apache.dubbo.rpc.ExporterListener 监听服务发布和取消暴露事件的 Listener
  * @see org.apache.dubbo.rpc.protocol.AbstractExporter
  */
 public interface Exporter<T> {
 
     /**
-     * get invoker.
+     * 获取底层封装的 Invoker 对象
      *
      * @return invoker
      */
     Invoker<T> getInvoker();
 
     /**
-     * unexport.
-     * <p>
-     * <code>
-     * getInvoker().destroy();
-     * </code>
+     * 取消发布底层的 Invoker 对象，通过调用 Invoker
+     * 的 {@link Node#destroy() destroy} 方法实现
      */
     void unexport();
 

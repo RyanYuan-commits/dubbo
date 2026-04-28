@@ -30,10 +30,19 @@ import java.util.concurrent.TimeUnit;
  */
 public abstract class AbstractTimerTask implements TimerTask {
 
+    /**
+     * 内部接口，定时任务会从这个类中获取 Channel
+     */
     private final ChannelProvider channelProvider;
 
+    /**
+     * 任务的国旗时间
+     */
     private final Long tick;
 
+    /**
+     * 任务是否被取消
+     */
     protected volatile boolean cancel = false;
 
     AbstractTimerTask(ChannelProvider channelProvider, Long tick) {
@@ -92,6 +101,9 @@ public abstract class AbstractTimerTask implements TimerTask {
     protected abstract void doTask(Channel channel);
 
     interface ChannelProvider {
+
         Collection<Channel> getChannels();
+
     }
+
 }

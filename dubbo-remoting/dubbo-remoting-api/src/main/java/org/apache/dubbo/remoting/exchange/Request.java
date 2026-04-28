@@ -30,7 +30,7 @@ public class Request {
 
     /**
      * 用于生成请求的自增 ID, 当递增到 Long.MAX_VALUE 之后,
-     * 会溢出到 Long.MIN_VALUE, 可以继续使用该负数作为消息 ID, 随机生成初始值.
+     * 会溢出为 Long.MIN_VALUE, 可以继续使用该负数作为消息 ID, 随机生成初始值.
      */
     private static final AtomicLong INVOKE_ID = new AtomicLong(0);
 
@@ -75,7 +75,6 @@ public class Request {
     }
 
     private static long newId() {
-        // getAndIncrement() When it grows to MAX_VALUE, it will grow to MIN_VALUE, and the negative can be used as ID
         return INVOKE_ID.getAndIncrement();
     }
 
@@ -157,4 +156,5 @@ public class Request {
         return "Request [id=" + mId + ", version=" + mVersion + ", twoway=" + mTwoWay + ", event=" + mEvent
                 + ", broken=" + mBroken + ", data=" + (mData == this ? "this" : safeToString(mData)) + "]";
     }
+
 }

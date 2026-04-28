@@ -68,18 +68,19 @@ final public class NettyCodecAdapter {
             NettyChannel channel = NettyChannel.getOrAddChannel(ch, url, handler);
             codec.encode(channel, buffer, msg);
         }
+
     }
 
     private class InternalDecoder extends ByteToMessageDecoder {
 
         @Override
         protected void decode(ChannelHandlerContext ctx, ByteBuf input, List<Object> out) throws Exception {
-
             ChannelBuffer message = new NettyBackedChannelBuffer(input);
 
             NettyChannel channel = NettyChannel.getOrAddChannel(ctx.channel(), url, handler);
 
-            // decode object.
+            // 将二进制流解析为 Request 对象，属于第一步反序列化，Request 内部的 mData 是 Decodable 类型
+            // 后续还需要对其进行反序列化，根据 Dispatcher 决定在哪个线程进行。
             do {
                 int saveReaderIndex = message.readerIndex();
                 // 将编解码任务委托给 codec 进行，codec 在 AbstractEndpoint 中定义

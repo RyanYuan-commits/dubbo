@@ -109,4 +109,5 @@ public class RouterChain<T> {
         this.invokers = (invokers == null ? Collections.emptyList() : invokers);
         routers.forEach(router -> router.notify(this.invokers));
     }
+
 }

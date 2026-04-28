@@ -19,20 +19,20 @@ package org.apache.dubbo.rpc;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
- * Extension for intercepting the invocation for both service provider and consumer, furthermore, most of
- * functions in dubbo are implemented base on the same mechanism. Since every time when remote method is
- * invoked, the filter extensions will be executed too, the corresponding penalty should be considered before
- * more filters are added.
+ * 用于拦截 Provider 和 Consumer 的调用过程；此外 Dubbo 中的大多数功能都是基于同一套 Filter 机制实现的。<br>
+ * 每次 invoke 都会执行完整的过滤器链路，在增加过滤器前需要考虑其损耗。<br>
+ *
  * <pre>
- *  They way filter work from sequence point of view is
+ *  从执行时序上来看，过滤器的工作方式为：
  *    <b>
- *    ...code before filter ...
- *          invoker.invoke(invocation) //filter work in a filter implementation class
- *          ...code after filter ...
+ *    ... 过滤器前置逻辑 ...
+ *          invoker.invoke(invocation) // 进入下一个 Filter 或者执行真正的调用
+ *    ... 过滤器后置逻辑 ...
  *    </b>
- *    Caching is implemented in dubbo using filter approach. If cache is configured for invocation then before
- *    remote call configured caching type's (e.g. Thread Local, JCache etc) implementation invoke method gets called.
+ *    Dubbo 中的缓存功能就是通过过滤器方式实现的。如果为调用配置了缓存，那么在远程调用之前，
+ *    会先调用所配置的缓存类型（例如：Thread Local、Jcache 等）的实现类中的 invoke 方法。
  * </pre>
+ *
  * Filter. (SPI, Singleton, ThreadSafe)
  *
  * @see org.apache.dubbo.rpc.filter.GenericFilter
@@ -42,8 +42,9 @@ import org.apache.dubbo.common.extension.SPI;
  */
 @SPI
 public interface Filter {
+
     /**
-     * Make sure call invoker.invoke() in your implementation.
+     * 确保实现中存在 invoker.invoke() 方法的调用
      */
     Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException;
 

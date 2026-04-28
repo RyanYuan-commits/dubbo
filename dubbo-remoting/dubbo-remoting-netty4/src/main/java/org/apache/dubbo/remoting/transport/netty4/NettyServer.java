@@ -76,7 +76,8 @@ public class NettyServer extends AbstractServer implements RemotingServer {
 
     public NettyServer(URL url, ChannelHandler handler) throws RemotingException {
         // 你可以自定义线程池的名称和类型通过 CommonConstants.THREAD_NAME_KEY 和 CommonConstants.THREADPOOL_KEY
-        // 参数中的 handler 会被包装：MultiMessageHandler -> HeartbeatHandler -> handler (HeaderExchangeHandler）
+        // 参数中的 handler 会被包装：MultiMessageHandler -> HeartbeatHandler -> WrappedChannelHandler -> handler
+        // 其中 WrappedChannelHandler 负责线程上下文的切换，内部包装的 handler 为 HeaderExchangeHandler
         super(ExecutorUtil.setThreadName(url, SERVER_THREAD_POOL_NAME), ChannelHandlers.wrap(handler, url));
     }
 

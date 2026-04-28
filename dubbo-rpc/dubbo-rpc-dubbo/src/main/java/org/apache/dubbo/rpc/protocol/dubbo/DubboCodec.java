@@ -213,4 +213,5 @@ public class DubboCodec extends ExchangeCodec {
             out.writeAttachments(result.getObjectAttachments());
         }
     }
+
 }

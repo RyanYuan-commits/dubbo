@@ -26,7 +26,7 @@ import org.apache.dubbo.remoting.exchange.Exchanger;
 import org.apache.dubbo.remoting.transport.DecodeHandler;
 
 /**
- * DefaultMessenger
+ * DefaultMessenger，在下层 Client 和 Server 的基础上添加装饰器
  */
 public class HeaderExchanger implements Exchanger {
 

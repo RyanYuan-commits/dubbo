@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * ExchangeCodec.
+ * ExchangeCodec，在 TelnetCodec 的基础上，添加了处理协议头的能力
  */
 public class ExchangeCodec extends TelnetCodec {
 
