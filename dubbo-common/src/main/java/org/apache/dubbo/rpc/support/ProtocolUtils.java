@@ -37,6 +37,12 @@ public class ProtocolUtils {
     private ProtocolUtils() {
     }
 
+    /**
+     * 首先按照 service_group 分组，然后依次按照 service_name、service_version、port 分组
+     *
+     * @param url url
+     * @return service_key str
+     */
     public static String serviceKey(URL url) {
         return serviceKey(url.getPort(), url.getPath(), url.getParameter(VERSION_KEY),
                 url.getParameter(GROUP_KEY));

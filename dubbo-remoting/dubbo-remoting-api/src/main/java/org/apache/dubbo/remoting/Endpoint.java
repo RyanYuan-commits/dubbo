@@ -46,7 +46,7 @@ public interface Endpoint {
     void send(Object message) throws RemotingException;
 
     /**
-     * 发送消息
+     * 发送消息，不关注 Response（OneWay）
      *
      * @param message 消息对象
      * @param sent 是否阻塞等待消息写入完成

@@ -51,14 +51,23 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 当前 Invoker 封装的业务接口类型，如 DemoService
+     */
     private final Class<T> type;
 
+    /**
+     * 与当前 Invoker 关联的 URL，包含全配置信息
+     */
     private final URL url;
 
+    /**
+     * 当前 Invoker 关联的附加信息
+     */
     private final Map<String, Object> attachment;
 
+    // 当前 Invoker 的状态
     private volatile boolean available = true;
-
     private AtomicBoolean destroyed = new AtomicBoolean(false);
 
     public AbstractInvoker(Class<T> type, URL url) {
@@ -133,33 +142,37 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
 
     @Override
     public Result invoke(Invocation inv) throws RpcException {
-        // if invoker is destroyed due to address refresh from registry, let's allow the current invoke to proceed
+        // 如果 invoker 是因为配置中心刷新地址而销毁，则允许当前调用继续进行
         if (destroyed.get()) {
             logger.warn("Invoker for service " + this + " on consumer " + NetUtils.getLocalHost() + " is destroyed, "
                     + ", dubbo version is " + Version.getVersion() + ", this invoker should not be used any longer");
         }
+
+        // 转为 RpcInvocation
         RpcInvocation invocation = (RpcInvocation) inv;
         invocation.setInvoker(this);
+        // 将附加信息添加到 RpcInvocation 中
         if (CollectionUtils.isNotEmptyMap(attachment)) {
             invocation.addObjectAttachmentsIfAbsent(attachment);
         }
 
         Map<String, Object> contextAttachments = RpcContext.getContext().getObjectAttachments();
         if (CollectionUtils.isNotEmptyMap(contextAttachments)) {
-            /**
-             * invocation.addAttachmentsIfAbsent(context){@link RpcInvocation#addAttachmentsIfAbsent(Map)}should not be used here,
-             * because the {@link RpcContext#setAttachment(String, String)} is passed in the Filter when the call is triggered
-             * by the built-in retry mechanism of the Dubbo. The attachment to update RpcContext will no longer work, which is
-             * a mistake in most cases (for example, through Filter to RpcContext output traceId and spanId and other information).
+            /*
+             * 此处应该使用追加式的更新，而不是使用 addAttachmentsIfAbsent，否则当 Dubbo 内置的重试机制出发时，Filters
+             * 透传的 attachment 将不会被更新，这在绝大多数情况下都是异常的。
              */
             invocation.addObjectAttachments(contextAttachments);
         }
 
+        // 设置调用模式
         invocation.setInvokeMode(RpcUtils.getInvokeMode(url, invocation));
+        // 如果异步调用，需要给本次调用设置一个唯一的 ID
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
         AsyncRpcResult asyncResult;
         try {
+            // 调用子类实现的 doInvoke() 方法
             asyncResult = (AsyncRpcResult) doInvoke(invocation);
         } catch (InvocationTargetException e) { // biz exception
             Throwable te = e.getTargetException();

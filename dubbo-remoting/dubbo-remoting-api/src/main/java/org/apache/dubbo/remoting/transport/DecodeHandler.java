@@ -32,7 +32,7 @@ import org.apache.dubbo.remoting.exchange.Response;
  * 都会提供一个 <code>decode()</code> 方法实现对自身的解码，其 <code>receive()</code> 调用该
  * 方法进行消息的解码，然后委托给 {@link ChannelHandler handler} 处理。
  * <p>
- * 与 Codec2 进行区分，DecodeHandler 实现的是对请求体和响应结果的编解码，Codec2 实现的三
+ * 与 {@link org.apache.dubbo.remoting.Codec2} 进行区分，DecodeHandler 实现的是对请求体和响应结果的编解码，Codec2 实现的三
  * 消息和字节流之间的相互转化。
  */
 public class DecodeHandler extends AbstractChannelHandlerDelegate {

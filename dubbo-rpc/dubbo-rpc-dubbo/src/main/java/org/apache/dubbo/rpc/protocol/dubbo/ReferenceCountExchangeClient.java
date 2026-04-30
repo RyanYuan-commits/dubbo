@@ -36,6 +36,7 @@ import static org.apache.dubbo.rpc.protocol.dubbo.Constants.LAZY_CONNECT_INITIAL
 
 /**
  * dubbo protocol support class.
+ * 在 ExchangeClient 的基础上，添加引用计数功能
  */
 @SuppressWarnings("deprecation")
 final class ReferenceCountExchangeClient implements ExchangeClient {
@@ -157,13 +158,14 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
     @Override
     public void close(int timeout) {
         if (referenceCount.decrementAndGet() <= 0) {
+            // 引用次数减到 0 时关闭
             if (timeout == 0) {
                 client.close();
-
             } else {
                 client.close(timeout);
             }
 
+            // 创建一个 LazyConnectExchangeClient，用于异常情况的兜底
             replaceWithLazyClient();
         }
     }

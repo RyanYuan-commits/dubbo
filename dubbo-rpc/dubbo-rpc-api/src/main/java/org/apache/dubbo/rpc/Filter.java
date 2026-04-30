@@ -48,6 +48,9 @@ public interface Filter {
      */
     Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException;
 
+    /**
+     * 有些 Filter 实现会同时实现该接口，在 invoke() 方法结束后，调用该接口的方法进行通知
+     */
     interface Listener {
 
         void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation);

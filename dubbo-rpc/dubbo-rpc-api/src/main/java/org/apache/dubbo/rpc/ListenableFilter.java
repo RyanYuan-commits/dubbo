@@ -20,11 +20,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * It's recommended to implement Filter.Listener directly for callback registration, check the default implementation,
- * see {@link org.apache.dubbo.rpc.filter.ExceptionFilter}, for example.
+ * 建议直接实现 Filter.Listener 以进行回调注册，请参考默认实现，例如 {@link org.apache.dubbo.rpc.filter.ExceptionFilter}。
  * <p>
- * If you do not want to share Listener instance between RPC calls. You can use ListenableFilter
- * to keep a 'one Listener each RPC call' model.
+ * 如果您不想在 RPC 调用之间共享 Listener 实例，可以使用 ListenableFilter 来保持“每次 RPC 调用一个 Listener”的模式。
  */
 public abstract class ListenableFilter implements Filter {
 

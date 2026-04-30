@@ -49,10 +49,19 @@ public class AppResponse implements Result {
 
     private static final long serialVersionUID = -6925924956850004727L;
 
+    /**
+     * 业务上的结果值，在 demo 中，是一个 "Hello Dubbo xxx" 的字符串
+     */
     private Object result;
 
+    /**
+     * 服务端返回的异常信息
+     */
     private Throwable exception;
 
+    /**
+     * 服务端返回的附加信息
+     */
     private Map<String, Object> attachments = new HashMap<>();
 
     public AppResponse() {

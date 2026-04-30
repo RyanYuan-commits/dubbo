@@ -25,6 +25,12 @@ import java.util.List;
 
 /**
  * Protocol. (API/SPI, Singleton, ThreadSafe)
+ * <p>
+ * 关键的装饰器实现：
+ * <ol>
+ *     <li> {@link org.apache.dubbo.rpc.protocol.ProtocolListenerWrapper} </li>
+ *     <li> {@link org.apache.dubbo.rpc.protocol.ProtocolFilterWrapper} </li>
+ * </ol>
  */
 @SPI("dubbo")
 public interface Protocol {

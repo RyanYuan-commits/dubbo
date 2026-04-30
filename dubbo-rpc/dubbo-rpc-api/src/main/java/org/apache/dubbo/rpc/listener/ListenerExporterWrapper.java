@@ -26,7 +26,7 @@ import org.apache.dubbo.rpc.Invoker;
 import java.util.List;
 
 /**
- * ListenerExporter
+ * Exporter 装饰器，通知 Listener 服务暴露
  */
 public class ListenerExporterWrapper<T> implements Exporter<T> {
 

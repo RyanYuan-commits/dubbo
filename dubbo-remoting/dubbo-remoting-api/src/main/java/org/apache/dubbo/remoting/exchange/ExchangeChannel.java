@@ -58,7 +58,7 @@ public interface ExchangeChannel extends Channel {
     CompletableFuture<Object> request(Object request, ExecutorService executor) throws RemotingException;
 
     /**
-     * send request.
+     * 发送的是关注 Response 的请求（TwoWay）
      *
      * @param request
      * @param timeout

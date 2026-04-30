@@ -123,14 +123,17 @@ public class DubboCodec extends ExchangeCodec {
                 } else {
                     DecodeableRpcInvocation inv;
                     if (channel.getUrl().getParameter(DECODE_IN_IO_THREAD_KEY, DEFAULT_DECODE_IN_IO_THREAD)) {
+                        // 决定是否在 IO 线程中解码，默认为 false，后续可以在业务线程中解码
                         inv = new DecodeableRpcInvocation(channel, req, is, proto);
                         inv.decode();
                     } else {
+                        // 只是读取数据，不会调用 decode() 方法
                         inv = new DecodeableRpcInvocation(channel, req,
                                 new UnsafeByteArrayInputStream(readMessageData(is)), proto);
                     }
                     data = inv;
                 }
+                // 设置 Request 的 data 字段
                 req.setData(data);
             } catch (Throwable t) {
                 if (log.isWarnEnabled()) {
@@ -166,25 +169,37 @@ public class DubboCodec extends ExchangeCodec {
 
     @Override
     protected void encodeRequestData(Channel channel, ObjectOutput out, Object data, String version) throws IOException {
+        // 请求体相关的内容封装在 RpcInvocation 中
         RpcInvocation inv = (RpcInvocation) data;
 
+        // 写入版本号
         out.writeUTF(version);
-        // https://github.com/apache/dubbo/issues/6138
+
+        // 写入服务名称
         String serviceName = inv.getAttachment(INTERFACE_KEY);
         if (serviceName == null) {
             serviceName = inv.getAttachment(PATH_KEY);
         }
         out.writeUTF(serviceName);
+
+        // 写入服务版本号
         out.writeUTF(inv.getAttachment(VERSION_KEY));
 
+        // 写入方法名称
         out.writeUTF(inv.getMethodName());
+
+        // 写入参数类型列表
         out.writeUTF(inv.getParameterTypesDesc());
+
+        // 依次写入全部参数
         Object[] args = inv.getArguments();
         if (args != null) {
             for (int i = 0; i < args.length; i++) {
                 out.writeObject(encodeInvocationArgument(channel, inv, i));
             }
         }
+
+        // 写入全部附加信息
         out.writeAttachments(inv.getObjectAttachments());
     }
 

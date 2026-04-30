@@ -33,32 +33,42 @@ import java.util.function.Function;
 import static org.apache.dubbo.common.utils.ReflectUtils.defaultReturn;
 
 /**
- * This class represents an unfinished RPC call, it will hold some context information for this call, for example RpcContext and Invocation,
- * so that when the call finishes and the result returns, it can guarantee all the contexts being recovered as the same as when the call was made
- * before any callback is invoked.
+ * 此类表示一个未完成的 RPC 调用，它将保存该调用的一些上下文信息，例如 RpcContext 和 Invocation，以便在调用完成并返回结
+ * 果时，确保在任何回调被调用之前，所有上下文都能恢复到与调用发生时相同的状态。
  * <p>
- * TODO if it's reasonable or even right to keep a reference to Invocation?
+ * TODO 保留对 Invocation 的引用是否合理或正确？
  * <p>
- * As {@link Result} implements CompletionStage, {@link AsyncRpcResult} allows you to easily build a async filter chain whose status will be
- * driven entirely by the state of the underlying RPC call.
+ * 由于 {@link Result} 实现了 CompletionStage，{@link AsyncRpcResult} 允许你轻松构建一个异步过滤器链，其状态将完全由底层
+ * RPC 调用的状态驱动。
  * <p>
- * AsyncRpcResult does not contain any concrete value (except the underlying value bring by CompletableFuture), consider it as a status transfer node.
- * {@link #getValue()} and {@link #getException()} are all inherited from {@link Result} interface, implementing them are mainly
- * for compatibility consideration. Because many legacy {@link Filter} implementation are most possibly to call getValue directly.
+ * AsyncRpcResult 不包含任何具体值（除了 CompletableFuture 带来的底层值），将其视为一个状态传输节点。
+ * {@link #getValue()} 和 {@link #getException()} 均继承自 {@link Result} 接口，实现它们主要是为了兼容性考虑。
+ * 因为许多遗留的 {@link Filter} 实现很可能会直接调用 getValue。
+ *
+ * @see org.apache.dubbo.rpc.protocol.AsyncToSyncInvoker 同步异步均返回 AsyncRpcResult，在该 Invoker 中完成同步异步转化
  */
 public class AsyncRpcResult implements Result {
+
     private static final Logger logger = LoggerFactory.getLogger(AsyncRpcResult.class);
 
-    /**
-     * RpcContext may already have been changed when callback happens, it happens when the same thread is used to execute another RPC call.
-     * So we should keep the reference of current RpcContext instance and restore it before callback being executed.
-     */
+    // 真正获取 Result 的线程和之前的不一定是同一个，需要将 RpcContext 保存和传递
     private RpcContext storedContext;
     private RpcContext storedServerContext;
+
+    /**
+     * 此次调用关联的线程池
+     */
     private Executor executor;
 
+    /**
+     * 调用关联的 Invocation
+     */
     private Invocation invocation;
 
+    /**
+     * DefaultFuture 回调链上的一个 Future，后面再 AsyncRpcResult 上添加的回调，都是添加到这个 Future 上
+     * @see AsyncRpcResult#whenCompleteWithContext(BiConsumer)
+     */
     private CompletableFuture<AppResponse> responseFuture;
 
     public AsyncRpcResult(CompletableFuture<AppResponse> future, Invocation invocation) {
@@ -193,8 +203,10 @@ public class AsyncRpcResult implements Result {
 
     public Result whenCompleteWithContext(BiConsumer<Result, Throwable> fn) {
         this.responseFuture = this.responseFuture.whenComplete((v, t) -> {
+            // 将构造函数存储的 RpcContext 设置到当前线程
             beforeContext.accept(v, t);
             fn.accept(v, t);
+            // 恢复当前线程原本的 RpcContext
             afterContext.accept(v, t);
         });
         return this;

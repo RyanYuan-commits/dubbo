@@ -23,15 +23,30 @@ import java.util.concurrent.atomic.AtomicInteger;
  * The internal data structure that stores the threadLocal variables for Netty and all {@link InternalThread}s.
  * Note that this class is for internal use only. Use {@link InternalThread}
  * unless you know what you are doing.
+ *
+ * @see InternalThread
+ * @see InternalThreadLocal
  */
 public final class InternalThreadLocalMap {
 
+    /**
+     * 存储绑定到该线程上的数据
+     */
     private Object[] indexedVariables;
 
+    /**
+     * 使用原生 Thread 时，使用该 ThreadLocal 存储 InternalThreadLocalMap，是一种降级策略
+     */
     private static ThreadLocal<InternalThreadLocalMap> slowThreadLocalMap = new ThreadLocal<InternalThreadLocalMap>();
 
+    /**
+     * 自增索引，计算下次存储到 indexedVariables 的数据的索引
+     */
     private static final AtomicInteger NEXT_INDEX = new AtomicInteger();
 
+    /**
+     * 当一个与线程绑定的值被删除后，该值会被设置为 UNSET
+     */
     public static final Object UNSET = new Object();
 
     public static InternalThreadLocalMap getIfSet() {
@@ -130,6 +145,12 @@ public final class InternalThreadLocalMap {
         return array;
     }
 
+    /**
+     * 获取或者创建与当前线程关联的 InternalThreadLocalMap
+     *
+     * @param thread current thread
+     * @return internal thread local map
+     */
     private static InternalThreadLocalMap fastGet(InternalThread thread) {
         InternalThreadLocalMap threadLocalMap = thread.threadLocalMap();
         if (threadLocalMap == null) {

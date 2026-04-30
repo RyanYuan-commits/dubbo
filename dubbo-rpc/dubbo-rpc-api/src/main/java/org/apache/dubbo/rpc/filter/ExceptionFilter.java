@@ -36,15 +36,15 @@ import java.lang.reflect.Method;
 /**
  * ExceptionInvokerFilter
  * <p>
- * Functions:
+ * 功能：
  * <ol>
- * <li>unexpected exception will be logged in ERROR level on provider side. Unexpected exception are unchecked
- * exception not declared on the interface</li>
- * <li>Wrap the exception not introduced in API package into RuntimeException. Framework will serialize the outer exception but stringnize its cause in order to avoid of possible serialization problem on client side</li>
+ * <li>在提供端（Provider）以 ERROR 级别记录未预期的异常。未预期的异常是指未在接口上声明的非检查型异常（unchecked exception）。</li>
+ * <li>将 API 包中未引入的异常包装为 RuntimeException。框架会序列化外层异常，但将其原因字符串化，以避免客户端可能出现的序列化问题。</li>
  * </ol>
  */
 @Activate(group = CommonConstants.PROVIDER)
 public class ExceptionFilter implements Filter, Filter.Listener {
+    
     private Logger logger = LoggerFactory.getLogger(ExceptionFilter.class);
 
     @Override

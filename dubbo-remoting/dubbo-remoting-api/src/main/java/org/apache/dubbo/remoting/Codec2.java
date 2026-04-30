@@ -23,7 +23,7 @@ import org.apache.dubbo.remoting.buffer.ChannelBuffer;
 import java.io.IOException;
 
 /**
- * 专门负责编解码功能的 ChannelHandler
+ * 专门负责编解码功能的 ChannelHandler，这里的编解码指的是对象和字节流之间的相互转化
  */
 @SPI
 public interface Codec2 {

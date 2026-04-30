@@ -46,9 +46,15 @@ public abstract class AbstractProtocol implements Protocol {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 用于存储被暴露出去的服务集合 <br/>
+     * <service_key, Exporter> <br/>
+     * service_key 由 {@link ProtocolUtils#serviceKey(URL)} 提供
+     */
     protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
     /**
+     * 记录了所有的 ProtocolServer 实例 <br/>
      * <host:port, ProtocolServer>
      */
     protected final Map<String, ProtocolServer> serverMap = new ConcurrentHashMap<>();
@@ -101,6 +107,7 @@ public abstract class AbstractProtocol implements Protocol {
 
     @Override
     public <T> Invoker<T> refer(Class<T> type, URL url) throws RpcException {
+        // 使用同步转异步 Invoker 包装
         return new AsyncToSyncInvoker<>(protocolBindingRefer(type, url));
     }
 

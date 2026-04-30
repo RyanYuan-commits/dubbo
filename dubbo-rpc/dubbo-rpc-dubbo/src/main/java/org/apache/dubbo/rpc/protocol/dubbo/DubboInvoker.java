@@ -82,10 +82,14 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
     @Override
     protected Result doInvoke(final Invocation invocation) throws Throwable {
         RpcInvocation inv = (RpcInvocation) invocation;
+        // 此次调用的方法名称
         final String methodName = RpcUtils.getMethodName(invocation);
+
+        // 添加附加信息
         inv.setAttachment(PATH_KEY, getUrl().getPath());
         inv.setAttachment(VERSION_KEY, version);
 
+        // 选择一个 ExchangeClient 用于发送请求
         ExchangeClient currentClient;
         if (clients.length == 1) {
             currentClient = clients[0];
@@ -94,17 +98,23 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         }
         try {
             boolean isOneway = RpcUtils.isOneway(getUrl(), invocation);
+            // 计算超时时间
             int timeout = calculateTimeout(invocation, methodName);
             if (isOneway) {
+                // 不需要关注返回值，使用 send() 方法发送
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
                 currentClient.send(inv, isSent);
                 return AsyncRpcResult.newDefaultAsyncResult(invocation);
             } else {
+                // 需要获取返回值，使用 request() 方法发送
+                // 获取处理响应的线程池，如果是同步请求，会使用 ThreadlessExecutor 来优化
                 ExecutorService executor = getCallbackExecutor(getUrl(), inv);
+                // 使用上面选择的 Client 发送请求
                 CompletableFuture<AppResponse> appResponseFuture =
                         currentClient.request(inv, timeout, executor).thenApply(obj -> (AppResponse) obj);
                 // save for 2.6.x compatibility, for example, TraceFilter in Zipkin uses com.alibaba.xxx.FutureAdapter
                 FutureContext.getContext().setCompatibleFuture(appResponseFuture);
+                // 将 AppResponse 封装成 AsyncResult 返回
                 AsyncRpcResult result = new AsyncRpcResult(appResponseFuture, inv);
                 result.setExecutor(executor);
                 return result;
@@ -177,4 +187,5 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         }
         return timeout;
     }
+
 }

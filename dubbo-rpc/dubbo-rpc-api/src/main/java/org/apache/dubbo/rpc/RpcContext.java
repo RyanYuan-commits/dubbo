@@ -41,11 +41,12 @@ import static org.apache.dubbo.rpc.Constants.RETURN_KEY;
 
 
 /**
+ * 线程级别的上下文信息，底层依赖 ThreadLocal 实现 <br/>
  * Thread local context. (API, ThreadLocal, ThreadSafe)
  * <p>
- * Note: RpcContext is a temporary state holder. States in RpcContext changes every time when request is sent or received.
- * For example: A invokes B, then B invokes C. On service B, RpcContext saves invocation info from A to B before B
- * starts invoking C, and saves invocation info from B to C after B invokes C.
+ * RpcContext 是一个临时状态持有者，每当发送或接收请求时，RpcContext 中的状态都会随之改变，例如在这个线程中，A 调用 B，
+ * 随后 B 再调用 C，在 B 调用 C 之前，RpcContext 持有的是 A 调用 B 的信息，在 B 调用 C 之后，RpcContext 持有的是 B 调用
+ * C 的信息。
  *
  * @export
  * @see org.apache.dubbo.rpc.filter.ContextFilter
@@ -53,9 +54,9 @@ import static org.apache.dubbo.rpc.Constants.RETURN_KEY;
 public class RpcContext {
 
     /**
+     * 存储的是当前 Client 调用或者当前 Server 接收的上下文信息
      * use internal thread local to improve performance
      */
-    // FIXME REQUEST_CONTEXT
     private static final InternalThreadLocal<RpcContext> LOCAL = new InternalThreadLocal<RpcContext>() {
         @Override
         protected RpcContext initialValue() {
@@ -63,7 +64,9 @@ public class RpcContext {
         }
     };
 
-    // FIXME RESPONSE_CONTEXT
+    /**
+     * 在接收响应时，会使用该 RpcContext 存储上下文信息
+     */
     private static final InternalThreadLocal<RpcContext> SERVER_LOCAL = new InternalThreadLocal<RpcContext>() {
         @Override
         protected RpcContext initialValue() {
@@ -72,20 +75,23 @@ public class RpcContext {
     };
 
     protected final Map<String, Object> attachments = new HashMap<>();
+
+    /**
+     * 记录上下文的键值对信息
+     */
     private final Map<String, Object> values = new HashMap<String, Object>();
 
     private List<URL> urls;
 
     private URL url;
 
+    // 调用的方法信息，与 Invocation 中的信息一致
     private String methodName;
-
     private Class<?>[] parameterTypes;
-
     private Object[] arguments;
 
+    // 自己和远端地址
     private InetSocketAddress localAddress;
-
     private InetSocketAddress remoteAddress;
 
     private String remoteApplicationName;
@@ -97,10 +103,12 @@ public class RpcContext {
     @Deprecated
     private Invocation invocation;
 
-    // now we don't use the 'values' map to hold these objects
-    // we want these objects to be as generic as possible
     private Object request;
     private Object response;
+
+    /**
+     * 异步 Context，存储异步调用相关的 RpcContext 以及异步请求相关的 Future
+     */
     private AsyncContext asyncContext;
 
     private boolean remove = true;

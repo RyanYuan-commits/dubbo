@@ -21,15 +21,11 @@ import java.util.IdentityHashMap;
 import java.util.Set;
 
 /**
- * InternalThreadLocal
- * A special variant of {@link ThreadLocal} that yields higher access performance when accessed from a
- * {@link InternalThread}.
- * <p></p>
- * Internally, a {@link InternalThread} uses a constant index in an array, instead of using hash code and hash table,
- * to look for a variable.  Although seemingly very subtle, it yields slight performance advantage over using a hash
- * table, and it is useful when accessed frequently.
- * <p></p>
- * This design is learning from {@see io.netty.util.concurrent.FastThreadLocal} which is in Netty.
+ * 一种特殊的 {@link ThreadLocal} 变体，当从 {@link InternalThread} 中访问时，能够获得更高的性能
+ * <p>
+ * {@link InternalThread} 使用数组索引来查找变量，而不是使用哈希，这会带来小幅度的性能提升，在频繁访问的场景下非常有用。
+ * <p>
+ * 这个设计借鉴自 Netty 的 {@see io.netty.util.concurrent.FastThreadLocal}
  */
 public class InternalThreadLocal<V> {
 
@@ -139,14 +135,18 @@ public class InternalThreadLocal<V> {
     }
 
     /**
-     * Sets the value for the current thread.
+     * 给当前线程设置变量
      */
     public final void set(V value) {
         if (value == null || value == InternalThreadLocalMap.UNSET) {
+            // 如果 value 是 null 或者 UNSET，则直接清除
             remove();
         } else {
+            // 获取与当前线程关联的 InternalThreadLocalMap
             InternalThreadLocalMap threadLocalMap = InternalThreadLocalMap.get();
+            // 将 value 设置到 InternalThreadLocalMap.indexedVariables 中
             if (threadLocalMap.setIndexedVariable(index, value)) {
+                // 将当前 InternalThreadLocal 记录到待删除集合中
                 addToVariablesToRemove(threadLocalMap, this);
             }
         }

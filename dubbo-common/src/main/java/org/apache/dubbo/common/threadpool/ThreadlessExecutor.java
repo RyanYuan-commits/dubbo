@@ -30,8 +30,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * 这个 Executor 没有管理任何线程，而是将提交的任务存放到阻塞队列中，一个线程可以调用 {@link #waitAndDrain()} 方法阻塞，如果有任务抵达，
- * 这个线程会被唤醒并执行此任务，在 AbstractInvoker#getCallbackExecutor 中创建。
+ * 这个 Executor 没有管理任何线程，而是将提交的任务存放到阻塞队列中，一个线程可以调用 {@link #waitAndDrain()} 方法阻塞，
+ * 如果有任务抵达，这个线程会被唤醒并执行此任务，在 AbstractInvoker#getCallbackExecutor 中创建。
+ * <p>
+ * 在 {@see AsyncToSyncInvoker} 中完成同步转异步，在 {@see AsyncRpcResult#get()} 方法中阻塞等待
  */
 public class ThreadlessExecutor extends AbstractExecutorService {
 

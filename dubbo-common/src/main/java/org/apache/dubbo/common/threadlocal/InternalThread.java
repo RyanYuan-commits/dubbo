@@ -19,6 +19,8 @@ package org.apache.dubbo.common.threadlocal;
 
 /**
  * InternalThread
+ * 
+ * @see NamedInternalThreadFactory
  */
 public class InternalThread extends Thread {
 
@@ -56,16 +58,16 @@ public class InternalThread extends Thread {
     }
 
     /**
-     * Returns the internal data structure that keeps the threadLocal variables bound to this thread.
-     * Note that this method is for internal use only, and thus is subject to change at any time.
+     * 返回绑定到当前线程的 ThreadLocal 变量的内部数据结构。
+     * 注意：此方法仅供内部使用，因此可能会随时更改。
      */
     public final InternalThreadLocalMap threadLocalMap() {
         return threadLocalMap;
     }
 
     /**
-     * Sets the internal data structure that keeps the threadLocal variables bound to this thread.
-     * Note that this method is for internal use only, and thus is subject to change at any time.
+     * 设置绑定到当前线程的 ThreadLocal 变量的内部数据结构。
+     * 注意：此方法仅供内部使用，因此可能会随时更改。
      */
     public final void setThreadLocalMap(InternalThreadLocalMap threadLocalMap) {
         this.threadLocalMap = threadLocalMap;

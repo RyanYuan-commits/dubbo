@@ -37,7 +37,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.EXPORTER_LISTENE
 import static org.apache.dubbo.common.constants.CommonConstants.INVOKER_LISTENER_KEY;
 
 /**
- * ListenerProtocol
+ * Protocol 装饰器，为 Protocol 创建的 Invoker 或 Exporter 添加监听能力
+ *
+ * @see ExporterListener
+ * @see InvokerListener
  */
 @Activate(order = 200)
 public class ProtocolListenerWrapper implements Protocol {
