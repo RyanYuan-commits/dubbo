@@ -40,7 +40,9 @@ import static org.apache.dubbo.common.constants.CommonConstants.MAX_PROXY_COUNT;
  */
 
 public abstract class Proxy {
+
     public static final InvocationHandler RETURN_NULL_INVOKER = (proxy, method, args) -> null;
+
     public static final InvocationHandler THROW_UNSUPPORTED_INVOKER = new InvocationHandler() {
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) {
@@ -110,8 +112,10 @@ public abstract class Proxy {
         Proxy proxy = null;
         synchronized (cache) {
             do {
+                // 查找 PROXY_CACHE_MAP 中缓存的 proxy
                 Object value = cache.get(key);
                 if (value instanceof Reference<?>) {
+                    // 在缓存中查找到了完整的代理类
                     proxy = (Proxy) ((Reference<?>) value).get();
                     if (proxy != null) {
                         return proxy;
@@ -119,11 +123,13 @@ public abstract class Proxy {
                 }
 
                 if (value == PENDING_GENERATION_MARKER) {
+                    // 其他线程正在生成代理类
                     try {
                         cache.wait();
                     } catch (InterruptedException e) {
                     }
                 } else {
+                    // 缓存中没有代理类，则生成代理类
                     cache.put(key, PENDING_GENERATION_MARKER);
                     break;
                 }
@@ -131,6 +137,7 @@ public abstract class Proxy {
             while (true);
         }
 
+        // 生成代理类类名后缀，避免类名冲突
         long id = PROXY_CLASS_COUNTER.getAndIncrement();
         String pkg = null;
         ClassGenerator ccp = null, ccm = null;
@@ -163,16 +170,20 @@ public abstract class Proxy {
                     }
                     worked.add(desc);
 
+                    // 构建方法体和 return 语句
                     int ix = methods.size();
                     Class<?> rt = method.getReturnType();
                     Class<?>[] pts = method.getParameterTypes();
 
+                    // 构建方法体
                     StringBuilder code = new StringBuilder("Object[] args = new Object[").append(pts.length).append("];");
                     for (int j = 0; j < pts.length; j++) {
                         code.append(" args[").append(j).append("] = ($w)$").append(j + 1).append(";");
                     }
+                    // 通过 InvocationHandler 调用目标方法
                     code.append(" Object ret = handler.invoke(this, methods[").append(ix).append("], args);");
                     if (!Void.TYPE.equals(rt)) {
+                        // 生成 return 语句
                         code.append(" return ").append(asArgument(rt, "ret")).append(";");
                     }
 
@@ -185,7 +196,7 @@ public abstract class Proxy {
                 pkg = PACKAGE_NAME;
             }
 
-            // create ProxyInstance class.
+            // 创建代理实例类 ProxyInstance
             String pcn = pkg + ".proxy" + id;
             ccp.setClassName(pcn);
             ccp.addField("public static java.lang.reflect.Method[] methods;");
@@ -195,7 +206,7 @@ public abstract class Proxy {
             Class<?> clazz = ccp.toClass();
             clazz.getField("methods").set(null, methods.toArray(new Method[0]));
 
-            // create Proxy class.
+            // 创建代理类
             String fcn = Proxy.class.getName() + id;
             ccm = ClassGenerator.newInstance(cl);
             ccm.setClassName(fcn);
@@ -209,7 +220,7 @@ public abstract class Proxy {
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
-            // release ClassGenerator
+            // 释放 ClassGenerator 的相关资源
             if (ccp != null) {
                 ccp.release();
             }

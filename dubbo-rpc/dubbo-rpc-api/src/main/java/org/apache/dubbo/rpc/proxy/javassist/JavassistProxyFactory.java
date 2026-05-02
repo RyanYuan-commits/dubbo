@@ -32,12 +32,14 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Invoker<T> invoker, Class<?>[] interfaces) {
+        // 通过 Proxy 创建代理类，然后传入 InvokerInvocationHandler 实例化
+        // 代理流程在 InvokerInvocationHandler 中，Class 创建的过程在 Proxy 中
         return (T) Proxy.getProxy(interfaces).newInstance(new InvokerInvocationHandler(invoker));
     }
 
     @Override
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
-        // TODO Wrapper cannot handle this scenario correctly: the classname contains '$'
+        // 通过 Wrapper 创建一个包装类对象
         final Wrapper wrapper = Wrapper.getWrapper(proxy.getClass().getName().indexOf('$') < 0 ? proxy.getClass() : type);
         return new AbstractProxyInvoker<T>(proxy, type, url) {
             @Override

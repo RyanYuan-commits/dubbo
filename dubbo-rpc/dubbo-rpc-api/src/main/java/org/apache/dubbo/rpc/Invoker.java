@@ -20,6 +20,14 @@ import org.apache.dubbo.common.Node;
 
 /**
  * Invoker. (API/SPI, Prototype, ThreadSafe)
+ * 有两个继承分支：
+ * <ol>
+ *     <li>
+ *         {@link org.apache.dubbo.rpc.protocol.AbstractInvoker}，常见子类有 DubboInvoker，调用底层 ExchangeClient 实现
+ *          请求逻辑，位于 Consumer 端口
+ *     </li>
+ *     <li> {@link org.apache.dubbo.rpc.proxy.AbstractProxyInvoker} 位于 Provider 端，用于封装底层调用 </li>
+ * </ol>
  *
  * @see org.apache.dubbo.rpc.Protocol#refer(Class, org.apache.dubbo.common.URL)
  * @see org.apache.dubbo.rpc.InvokerListener 监听 Consumer 引用服务时触发的事件

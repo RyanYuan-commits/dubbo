@@ -33,12 +33,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 
 /**
- * Wrapper.
+ * Wrapper，对 Java 类的一种包装，再需要调用方法时，根据传入的方法名和参数进行匹配，找到对应方法进行调用
  */
 public abstract class Wrapper {
+
     private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map
+
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
     private static final String[] OBJECT_METHODS = new String[]{"getClass", "hashCode", "toString", "equals"};
+
     private static final Wrapper OBJECT_WRAPPER = new Wrapper() {
         @Override
         public String[] getMethodNames() {
