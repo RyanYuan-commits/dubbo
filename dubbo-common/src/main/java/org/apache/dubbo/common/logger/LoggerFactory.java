@@ -32,14 +32,18 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Logger factory
+ * Logger factory，用于支持各种日志框架
  */
 public class LoggerFactory {
 
+    /**
+     * 维护所有的 {@link FailsafeLogger}
+     */
     private static final ConcurrentMap<String, FailsafeLogger> LOGGERS = new ConcurrentHashMap<>();
+
     private static volatile LoggerAdapter LOGGER_ADAPTER;
 
-    // search common-used logging frameworks
+    // 搜索常用的日志框架
     static {
         String logger = System.getProperty("dubbo.application.logger", "");
         switch (logger) {
@@ -79,6 +83,12 @@ public class LoggerFactory {
     private LoggerFactory() {
     }
 
+    /**
+     * 通过 SPI 初始化 LoggerAdapter
+     *
+     * @param loggerAdapter SPI Key
+     * @see org.apache.dubbo.config.ApplicationConfig#setLogger(String)
+     */
     public static void setLoggerAdapter(String loggerAdapter) {
         if (loggerAdapter != null && loggerAdapter.length() > 0) {
             setLoggerAdapter(ExtensionLoader.getExtensionLoader(LoggerAdapter.class).getExtension(loggerAdapter));
@@ -102,12 +112,13 @@ public class LoggerFactory {
     }
 
     /**
-     * Get logger provider
+     * 通过 class 获取 Logger 对象
      *
-     * @param key the returned logger will be named after clazz
+     * @param key 返回的 logger 会以该 class 对象命名
      * @return logger
      */
     public static Logger getLogger(Class<?> key) {
+        // 原始 Logger 由 LOGGER_ADAPTER 提供
         return LOGGERS.computeIfAbsent(key.getName(), name -> new FailsafeLogger(LOGGER_ADAPTER.getLogger(name)));
     }
 

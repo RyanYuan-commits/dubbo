@@ -19,19 +19,33 @@ package org.apache.dubbo.rpc.filter.tps;
 import java.util.concurrent.atomic.LongAdder;
 
 /**
- * Judge whether a particular invocation of service provider method should be allowed within a configured time interval.
- * As a state it contain name of key ( e.g. method), last invocation time, interval and rate count.
+ * 判断对当前 service 的调用在规定的 interval 中是否达到了次数限制
  */
 class StatItem {
 
+    /**
+     * service key
+     */
     private String name;
 
+    /**
+     * 上次重置 rate 的时间
+     */
     private long lastResetTime;
 
+    /**
+     * 时间间隔
+     */
     private long interval;
 
+    /**
+     * 初始为 rate，每次请求 token 减一，当其为 0 时不再通过任何请求
+     */
     private LongAdder token;
 
+    /**
+     * 速率上限
+     */
     private int rate;
 
     StatItem(String name, int rate, long interval) {

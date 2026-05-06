@@ -1471,9 +1471,9 @@ class URL implements Serializable {
     }
 
     /**
-     * The format of return value is '{group}/{interfaceName}:{version}'
+     * 返回值的格式为 '{group}/{interfaceName}:{version}'
      *
-     * @return
+     * @return service key
      */
     public String getServiceKey() {
         if (serviceKey != null) {
@@ -1488,9 +1488,9 @@ class URL implements Serializable {
     }
 
     /**
-     * The format of return value is '{group}/{path/interfaceName}:{version}'
+     * 返回值的格式为 '{group}/{path/interfaceName}:{version}'
      *
-     * @return
+     * @return path key
      */
     public String getPathKey() {
         String inf = StringUtils.isNotEmpty(path) ? path : getServiceInterface();

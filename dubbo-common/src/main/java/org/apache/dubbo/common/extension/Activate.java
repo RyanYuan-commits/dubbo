@@ -25,8 +25,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 用于根据给定条件自动激活某些扩展，
- * 例如：当存在多个实现时，<code>@Activate</code> 可用于加载特定的 <code>Filter</code> 扩展。
+ * 用于根据给定条件自动激活某些扩展，例如：当存在多个实现时，<code>@Activate</code> 可用于加载特定的
+ * <code>Filter</code> 扩展。
  * <ol>
  * <li>{@link Activate#group()} 指定组条件。框架 SPI 定义了有效的组值。
  * <li>{@link Activate#value()} 指定 {@link URL} 中的参数键条件。
@@ -84,7 +84,7 @@ public @interface Activate {
     String[] after() default {};
 
     /**
-     * Absolute ordering info, optional
+     * 可选，表示绝对优先级，可以为负数
      *
      * @return absolute ordering info
      */

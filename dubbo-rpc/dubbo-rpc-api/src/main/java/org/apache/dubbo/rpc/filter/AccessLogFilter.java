@@ -49,7 +49,7 @@ import static org.apache.dubbo.common.constants.CommonConstants.VERSION_KEY;
 import static org.apache.dubbo.rpc.Constants.ACCESS_LOG_KEY;
 
 /**
- * Record access log for the service.
+ * 负责将 Provider 或 Consumer 的日志信息写入文件中
  * <p>
  * Logger key is <code><b>dubbo.accesslog</b></code>.
  * In order to configure access log appear in the specified appender only, additivity need to be configured in log4j's
@@ -83,11 +83,12 @@ public class AccessLogFilter implements Filter {
     private static final ScheduledExecutorService LOG_SCHEDULED = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("Dubbo-Access-Log", true));
 
     /**
-     * Default constructor initialize demon thread for writing into access log file with names with access log key
-     * defined in url <b>accesslog</b>
+     * 默认构造方法会构建一个守护线程，定时的将日志写入文件，文件命名由 URL 中的 accesslog 决定
+     * 时间间隔为 5s
      */
     public AccessLogFilter() {
-        LOG_SCHEDULED.scheduleWithFixedDelay(this::writeLogToFile, LOG_OUTPUT_INTERVAL, LOG_OUTPUT_INTERVAL, TimeUnit.MILLISECONDS);
+        LOG_SCHEDULED.scheduleWithFixedDelay(this::writeLogToFile, LOG_OUTPUT_INTERVAL, LOG_OUTPUT_INTERVAL,
+                TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -101,31 +102,45 @@ public class AccessLogFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
         try {
+            // 获取 accessLogKey
             String accessLogKey = invoker.getUrl().getParameter(ACCESS_LOG_KEY);
             if (ConfigUtils.isNotEmpty(accessLogKey)) {
+                // 构造 AccessLogData 对象，其中记录了日志信息，如调用的服务名称、方法名称等
                 AccessLogData logData = buildAccessLogData(invoker, inv);
                 log(accessLogKey, logData);
             }
         } catch (Throwable t) {
             logger.warn("Exception in AccessLogFilter of service(" + invoker + " -> " + inv + ")", t);
         }
+        // 调用下一个 invoker
         return invoker.invoke(inv);
     }
 
     private void log(String accessLog, AccessLogData accessLogData) {
+        // 根据 ACCESS_LOG_KEY 获取对应的缓存集合
         Set<AccessLogData> logSet = LOG_ENTRIES.computeIfAbsent(accessLog, k -> new ConcurrentHashSet<>());
 
         if (logSet.size() < LOG_MAX_BUFFER) {
+            // 缓存大小没有超过阈值
             logSet.add(accessLogData);
         } else {
+            // 缓存大小超过阈值，触发缓存数据写入文件
             logger.warn("AccessLog buffer is full. Do a force writing to file to clear buffer.");
-            //just write current logSet to file.
+            // 将当前的 logSet 写入文件
             writeLogSetToFile(accessLog, logSet);
-            //after force writing, add accessLogData to current logSet
+            // 将还没写入的加入到 LOG_ENTRIES 中
             logSet.add(accessLogData);
         }
     }
 
+    /**
+     * 按照 ACCESS_LOG_KEY 的值将日志信息写入不同的日志文件中
+     * 如果值为 default 或者 true，使用 Dubbo 统一的日志框架，输出到日志文件中
+     * 如果是其他值，则会将这个值当作 access log 的名称，创建对应的目录和文件，完成输出
+     *
+     * @param accessLog ACCESS_LOG_KEY
+     * @param logSet 需要写入的日志
+     */
     private void writeLogSetToFile(String accessLog, Set<AccessLogData> logSet) {
         try {
             if (ConfigUtils.isDefault(accessLog)) {
@@ -179,9 +194,7 @@ public class AccessLogFilter implements Filter {
     }
 
     private void processWithServiceLogger(Set<AccessLogData> logSet) {
-        for (Iterator<AccessLogData> iterator = logSet.iterator();
-             iterator.hasNext();
-             iterator.remove()) {
+        for (Iterator<AccessLogData> iterator = logSet.iterator(); iterator.hasNext(); iterator.remove()) {
             AccessLogData logData = iterator.next();
             LoggerFactory.getLogger(LOG_KEY + "." + logData.getServiceName()).info(logData.getLogMessage());
         }

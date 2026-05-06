@@ -30,9 +30,7 @@ import static org.apache.dubbo.rpc.Constants.EXECUTES_KEY;
 
 
 /**
- * The maximum parallel execution request count per method per service for the provider.If the max configured
- * <b>executes</b> is set to 10 and if invoke request where it is already 10 then it will throws exception. It
- * continue the same behaviour un till it is <10.
+ * Provider 端的限流实现，与 ActiveLimitFilter 相对应，通过 URL 中的 executes 参数指定最大并发数目
  */
 @Activate(group = CommonConstants.PROVIDER, value = EXECUTES_KEY)
 public class ExecuteLimitFilter implements Filter, Filter.Listener {

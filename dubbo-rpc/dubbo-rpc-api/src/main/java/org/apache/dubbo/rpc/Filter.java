@@ -56,6 +56,7 @@ public interface Filter {
         void onResponse(Result appResponse, Invoker<?> invoker, Invocation invocation);
 
         void onError(Throwable t, Invoker<?> invoker, Invocation invocation);
+
     }
 
 }

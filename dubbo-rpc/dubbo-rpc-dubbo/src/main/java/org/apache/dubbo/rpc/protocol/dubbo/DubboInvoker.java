@@ -172,18 +172,27 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
         }
     }
 
+    /**
+     * 计算超时时间，如果没有配置 timeout countdown，将原本的超时时间传递给远端，如果配置了 timeout countdown，将剩余
+     * 时间传递给远端，timeout countdown 一般由 ConsumerContextFilter 设置
+     *
+     * @param invocation invocation
+     * @param methodName 调用的方法名称
+     * @return timeout
+     */
     private int calculateTimeout(Invocation invocation, String methodName) {
         Object countdown = RpcContext.getContext().get(TIME_COUNTDOWN_KEY);
         int timeout = DEFAULT_TIMEOUT;
         if (countdown == null) {
             timeout = (int) RpcUtils.getTimeout(getUrl(), methodName, RpcContext.getContext(), DEFAULT_TIMEOUT);
             if (getUrl().getParameter(ENABLE_TIMEOUT_COUNTDOWN_KEY, false)) {
-                invocation.setObjectAttachment(TIMEOUT_ATTACHMENT_KEY, timeout); // pass timeout to remote server
+                // 将 timeout 传递给远端
+                invocation.setObjectAttachment(TIMEOUT_ATTACHMENT_KEY, timeout);
             }
         } else {
             TimeoutCountDown timeoutCountDown = (TimeoutCountDown) countdown;
             timeout = (int) timeoutCountDown.timeRemaining(TimeUnit.MILLISECONDS);
-            invocation.setObjectAttachment(TIMEOUT_ATTACHMENT_KEY, timeout);// pass timeout to remote server
+            invocation.setObjectAttachment(TIMEOUT_ATTACHMENT_KEY, timeout);
         }
         return timeout;
     }

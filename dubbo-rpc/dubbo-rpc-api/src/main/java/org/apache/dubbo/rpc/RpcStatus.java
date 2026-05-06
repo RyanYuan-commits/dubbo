@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ * 记录当前应用对某个服务或服务中的某个方法的调用情况
  * URL statistics. (API, Cached, ThreadSafe)
  *
  * @see org.apache.dubbo.rpc.filter.ActiveLimitFilter
@@ -32,17 +33,58 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RpcStatus {
 
+    /**
+     * 当前 Consumer 调用每个服务的状态信息
+     * <url:rpc_status>
+     */
     private static final ConcurrentMap<String, RpcStatus> SERVICE_STATISTICS = new ConcurrentHashMap<String, RpcStatus>();
 
+    /**
+     * 当前 Consumer 调用每个方法的状态信息
+     * <url:<method_name:rpc_status>>
+     */
     private static final ConcurrentMap<String, ConcurrentMap<String, RpcStatus>> METHOD_STATISTICS = new ConcurrentHashMap<String, ConcurrentMap<String, RpcStatus>>();
+
     private final ConcurrentMap<String, Object> values = new ConcurrentHashMap<String, Object>();
+
+    /**
+     * 当前的并发度，在请求发起时增加，在 Response 返回时减少
+     */
     private final AtomicInteger active = new AtomicInteger();
+
+    /**
+     * 调用的总数，在 Response 返回后记录
+     */
     private final AtomicLong total = new AtomicLong();
+
+    /**
+     * 失败的调用数
+     */
     private final AtomicInteger failed = new AtomicInteger();
+
+    /**
+     * 所有调用的总耗时
+     */
     private final AtomicLong totalElapsed = new AtomicLong();
+
+    /**
+     * 所有失败调用的总耗时
+     */
     private final AtomicLong failedElapsed = new AtomicLong();
+
+    /**
+     * 所有调用中的最长耗时
+     */
     private final AtomicLong maxElapsed = new AtomicLong();
+
+    /**
+     * 失败调用中的最长耗时
+     */
     private final AtomicLong failedMaxElapsed = new AtomicLong();
+
+    /**
+     * 成功调用中的最长耗时
+     */
     private final AtomicLong succeededMaxElapsed = new AtomicLong();
 
     private RpcStatus() {
@@ -92,7 +134,8 @@ public class RpcStatus {
     }
 
     /**
-     * @param url
+     * 在远程调用之前开始执行，获取 URL 对应的 server_status 和 service_status，增加并发度，若并发度大于 max
+     * 返回 false。
      */
     public static boolean beginCount(URL url, String methodName, int max) {
         max = (max <= 0) ? Integer.MAX_VALUE : max;
@@ -102,6 +145,7 @@ public class RpcStatus {
             return false;
         }
         for (int i; ; ) {
+            // 尝试将 method 的并发调用次数 + 1
             i = methodStatus.active.get();
             if (i + 1 > max) {
                 return false;
@@ -110,6 +154,7 @@ public class RpcStatus {
                 break;
             }
         }
+        // 记录应用的并发调用次数
         appStatus.active.incrementAndGet();
         return true;
     }

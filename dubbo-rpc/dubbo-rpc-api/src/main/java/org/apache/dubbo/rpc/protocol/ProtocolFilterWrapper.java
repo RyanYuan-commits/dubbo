@@ -54,7 +54,8 @@ public class ProtocolFilterWrapper implements Protocol {
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
         // 确定当前激活的 Filter 拓展
-        List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
+        List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(),
+                key, group);
 
         if (!filters.isEmpty()) {
             for (int i = filters.size() - 1; i >= 0; i--) {
@@ -82,6 +83,7 @@ public class ProtocolFilterWrapper implements Protocol {
                     public Result invoke(Invocation invocation) throws RpcException {
                         Result asyncResult;
                         try {
+                            // 调用当前的 filter 的 invoke 方法，调用时传入下一个 filter（invoker） 实例
                             asyncResult = filter.invoke(next, invocation);
                         } catch (Exception e) {
                             if (filter instanceof ListenableFilter) {
@@ -99,10 +101,9 @@ public class ProtocolFilterWrapper implements Protocol {
                                 listener.onError(e, invoker, invocation);
                             }
                             throw e;
-                        } finally {
-
                         }
                         return asyncResult.whenCompleteWithContext((r, t) -> {
+                            // 如果 Filter 需要感知结果，在返回后调用 Filter 对应的监听方法
                             if (filter instanceof ListenableFilter) {
                                 ListenableFilter listenableFilter = ((ListenableFilter) filter);
                                 Filter.Listener listener = listenableFilter.listener(invocation);
@@ -137,6 +138,7 @@ public class ProtocolFilterWrapper implements Protocol {
                     public String toString() {
                         return invoker.toString();
                     }
+
                 };
             }
         }

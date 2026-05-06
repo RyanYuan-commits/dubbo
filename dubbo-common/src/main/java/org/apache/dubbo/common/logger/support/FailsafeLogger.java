@@ -20,6 +20,10 @@ import org.apache.dubbo.common.Version;
 import org.apache.dubbo.common.logger.Logger;
 import org.apache.dubbo.common.utils.NetUtils;
 
+/**
+ * Dubbo 为常用的日志框架都提供了一个 Logger 实现，如 Log4j2Logger，Slf4jLogger 等；FailsafeLogger 是这些 Logger 的装饰
+ * 器，使用 try-catch 块包裹输出方法，避免日志打印异常影响程序运行。
+ */
 public class FailsafeLogger implements Logger {
 
     private Logger logger;
