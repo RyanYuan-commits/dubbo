@@ -32,6 +32,9 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.TYPE_KEY;
 
+/**
+ * ScriptRouterFactory 的装饰器，其扩展名为 file，FileRouterFactory 在 ScriptRouterFactory 基础上增加了读取文件的能力
+ */
 public class FileRouterFactory implements RouterFactory {
 
     public static final String NAME = "file";

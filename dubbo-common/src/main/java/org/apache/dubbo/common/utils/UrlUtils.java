@@ -473,16 +473,34 @@ public class UrlUtils {
         return urls.stream().filter(predicate).collect(Collectors.toList());
     }
 
+    /**
+     * 配置类型的 URL，可以从配置中心的 configurators 目录获取
+     *
+     * @param url url
+     * @return is configurator url
+     */
     public static boolean isConfigurator(URL url) {
         return OVERRIDE_PROTOCOL.equals(url.getProtocol()) ||
                 CONFIGURATORS_CATEGORY.equals(url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY));
     }
 
+    /**
+     * 路由类型的 URL，可以转化为 Router 对象，可以从配置中心的 routers 目录获取
+     *
+     * @param url url
+     * @return is route url
+     */
     public static boolean isRoute(URL url) {
         return ROUTE_PROTOCOL.equals(url.getProtocol()) ||
                 ROUTERS_CATEGORY.equals(url.getParameter(CATEGORY_KEY, DEFAULT_CATEGORY));
     }
 
+    /**
+     * Provider 类型的 URL，可以转化为 Invoker 对象，可以从配置中心的 providers 目录获取
+     *
+     * @param url url
+     * @return is provider url
+     */
     public static boolean isProvider(URL url) {
         return !OVERRIDE_PROTOCOL.equals(url.getProtocol()) &&
                 !ROUTE_PROTOCOL.equals(url.getProtocol()) &&

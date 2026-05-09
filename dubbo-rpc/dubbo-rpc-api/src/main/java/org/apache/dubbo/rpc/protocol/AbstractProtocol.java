@@ -47,15 +47,15 @@ public abstract class AbstractProtocol implements Protocol {
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * 用于存储被暴露出去的服务集合 <br/>
-     * <service_key, Exporter> <br/>
+     * 存储被暴露出去的服务集合 <br/>
+     * {service_key:exporter} <br/>
      * service_key 由 {@link ProtocolUtils#serviceKey(URL)} 提供
      */
     protected final Map<String, Exporter<?>> exporterMap = new ConcurrentHashMap<String, Exporter<?>>();
 
     /**
      * 记录了所有的 ProtocolServer 实例 <br/>
-     * <host:port, ProtocolServer>
+     * {host:port : ProtocolServer}
      */
     protected final Map<String, ProtocolServer> serverMap = new ConcurrentHashMap<>();
 
@@ -120,4 +120,5 @@ public abstract class AbstractProtocol implements Protocol {
     public Collection<Exporter<?>> getExporters() {
         return Collections.unmodifiableCollection(exporterMap.values());
     }
+
 }

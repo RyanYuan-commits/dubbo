@@ -32,6 +32,7 @@ import java.util.List;
  * StaticDirectory
  */
 public class StaticDirectory<T> extends AbstractDirectory<T> {
+
     private static final Logger logger = LoggerFactory.getLogger(StaticDirectory.class);
 
     private final List<Invoker<T>> invokers;
@@ -101,6 +102,7 @@ public class StaticDirectory<T> extends AbstractDirectory<T> {
     protected List<Invoker<T>> doList(Invocation invocation) throws RpcException {
         List<Invoker<T>> finalInvokers = invokers;
         if (routerChain != null) {
+            // 通过 RouterChain 过滤出符合条件的 invoker 集合
             try {
                 finalInvokers = routerChain.route(getConsumerUrl(), invocation);
             } catch (Throwable t) {

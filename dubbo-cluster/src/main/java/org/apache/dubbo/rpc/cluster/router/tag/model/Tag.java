@@ -22,7 +22,9 @@ import java.util.List;
  *
  */
 public class Tag {
+
     private String name;
+
     private List<String> addresses;
 
     public String getName() {
@@ -40,4 +42,5 @@ public class Tag {
     public void setAddresses(List<String> addresses) {
         this.addresses = addresses;
     }
+
 }

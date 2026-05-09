@@ -25,7 +25,12 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.cluster.support.FailoverCluster;
 
 /**
+ * 集群容错接口，在某些 Provider 节点发生故障时，让 Consumer 的调用能够发送到正常的 Provider 节点
  * Cluster. (SPI, Singleton, ThreadSafe)
+ * <p>
+ * 当调用进入 Cluster 的时候，Cluster 会创建一个 AbstractClusterInvoker 对象，在这个 AbstractClusterInvoker 中，首先会
+ * 从 Directory 中获取当前 Invoker 集合；然后按照 Router 集合进行路由，得到符合条件的 Invoker 集合；接下来按照
+ * LoadBalance 指定的负载均衡策略得到最终要调用的 Invoker 对象。
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Computer_cluster">Cluster</a>
  * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">Fault-Tolerant</a>

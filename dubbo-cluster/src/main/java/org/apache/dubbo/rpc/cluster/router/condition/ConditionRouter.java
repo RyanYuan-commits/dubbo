@@ -49,15 +49,27 @@ import static org.apache.dubbo.rpc.cluster.Constants.RULE_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 
 /**
- * ConditionRouter
- *
+ * ConditionRouter，路由规则基于条件表达式，如 host = 192.168.0.100 => host = 192.168.0.150
  */
 public class ConditionRouter extends AbstractRouter {
+
     public static final String NAME = "condition";
 
     private static final Logger logger = LoggerFactory.getLogger(ConditionRouter.class);
+
+    /**
+     * 用于切分路由规则的正则表达式
+     */
     protected static final Pattern ROUTE_PATTERN = Pattern.compile("([&!=,]*)\\s*([^&!=,\\s]+)");
+
+    /**
+     * Consumer 匹配的条件集合，通过解析条件表达式 rule 的 => 之前半部分，可以得到该集合中的内容。
+     */
     protected Map<String, MatchPair> whenCondition;
+
+    /**
+     * Provider 匹配的条件集合，通过解析条件表达式 rule 的 => 之后半部分，可以得到该集合中的内容。
+     */
     protected Map<String, MatchPair> thenCondition;
 
     private boolean enabled;

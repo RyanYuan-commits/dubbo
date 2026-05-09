@@ -21,18 +21,12 @@ import org.apache.dubbo.common.extension.Adaptive;
 import org.apache.dubbo.common.extension.SPI;
 
 /**
+ * 工厂接口，根据 URL 创建对应类型的 Configurator 实例，有 override 和 absent 两种实现
  * ConfiguratorFactory. (SPI, Singleton, ThreadSafe)
- *
  */
 @SPI
 public interface ConfiguratorFactory {
 
-    /**
-     * get the configurator instance.
-     *
-     * @param url - configurator url.
-     * @return configurator instance.
-     */
     @Adaptive("protocol")
     Configurator getConfigurator(URL url);
 

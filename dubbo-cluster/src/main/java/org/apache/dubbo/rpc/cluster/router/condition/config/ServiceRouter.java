@@ -23,14 +23,18 @@ import org.apache.dubbo.common.config.configcenter.DynamicConfiguration;
  * Service level router, "server-unique-name.condition-router"
  */
 public class ServiceRouter extends ListenableRouter {
+
     public static final String NAME = "SERVICE_ROUTER";
+
     /**
-     * ServiceRouter should before AppRouter
+     * service router 应在 app router 之前生效
      */
     private static final int SERVICE_ROUTER_DEFAULT_PRIORITY = 140;
 
     public ServiceRouter(URL url) {
+        // rule key: "{interface}:[version]:[group]"
         super(url, DynamicConfiguration.getRuleKey(url));
         this.priority = SERVICE_ROUTER_DEFAULT_PRIORITY;
     }
+
 }

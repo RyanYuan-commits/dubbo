@@ -34,20 +34,28 @@ import static org.apache.dubbo.common.constants.CommonConstants.MONITOR_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.REFER_KEY;
 
 /**
- * Abstract implementation of Directory: Invoker list returned from this Directory's list method have been filtered by Routers
- *
+ * Directory 接口的抽象实现，从 Directory 获取的 Invoker 集合会经过 Routers 的过滤，AbstractDirectory 有两个具体实现：
+ * <ol>
+ *     <li> {@see RegistryDirectory}：维护的 Invoker 集合会随着注册中心中维护的注册信息动态发生变化 </li>
+ *     <li> {@see StaticDirectory}：维护的 Invoker 在首次创建后不会再变化 </li>
+ * </ol>
  */
 public abstract class AbstractDirectory<T> implements Directory<T> {
 
-    // logger
     private static final Logger logger = LoggerFactory.getLogger(AbstractDirectory.class);
 
     private final URL url;
 
     private volatile boolean destroyed = false;
 
+    /**
+     * Consumer 端的 URL 信息
+     */
     private volatile URL consumerUrl;
 
+    /**
+     * 记录当前使用的 Router 对象
+     */
     protected RouterChain<T> routerChain;
 
     public AbstractDirectory(URL url) {

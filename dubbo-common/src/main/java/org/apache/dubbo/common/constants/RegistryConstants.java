@@ -49,6 +49,22 @@ public interface RegistryConstants {
 
     String ROUTE_PROTOCOL = "route";
 
+    /**
+     * URL 协议类型，表示该配置采用覆盖方式，如
+     * <code>
+     *  override://0.0.0.0/org.apache.dubbo.demo.DemoService?category=configurators&dynamic=false&enabled=true&
+     *  application=dubbo-demo-api-consumer&timeout=1000
+     * </code>
+     * <ul>
+     *  <li> 0.0.0.0 表示对所有 IP 生效，如果只想覆盖某个特定的 ip，可以使用该 Provider 的具体 IP </li>
+     *  <li> org.apache.dubbo.demo.DemoService 表示只对 DemoService 生效 </li>
+     *  <li> category=configuration 表示该 URL 为动态配置类型 </li>
+     *  <li> dynamic=false 表示该 URL 为持久数据，及时注册该 URL 的节点退出，该 URL 仍会在注册中心保存 </li>
+     *  <li> enabled=true，表示该 URL 的覆盖规则已生效 </li>
+     *  <li> application=dubbo-demo-api-consumer，表示只对指定应用生效。如果不指定，则默认表示对所有应用都生效 </li>
+     *  <li> timeout=1000，表示将满足以上条件 Provider URL 中的 timeout 参数值覆盖为 1000 </li>
+     * </ul>
+     */
     String OVERRIDE_PROTOCOL = "override";
 
     String COMPATIBLE_CONFIG_KEY = "compatible_config";

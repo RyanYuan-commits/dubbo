@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * ShortestResponseLoadBalance
+ * ShortestResponseLoadBalance，最短响应时间 load balance
  * </p>
  * Filter the number of invokers with the shortest response time of success calls and count the weights and quantities of these invokers.
  * If there is only one invoker, use the invoker directly;
@@ -38,35 +38,38 @@ public class ShortestResponseLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
-        // Number of invokers
+        // 记录Invoker集合的数量
         int length = invokers.size();
-        // Estimated shortest response time of all invokers
+        // 用于记录所有Invoker集合中最短响应时间
         long shortestResponse = Long.MAX_VALUE;
-        // The number of invokers having the same estimated shortest response time
+        // 具有相同最短响应时间的Invoker个数
         int shortestCount = 0;
-        // The index of invokers having the same estimated shortest response time
+        // 存放所有最短响应时间的Invoker的下标
         int[] shortestIndexes = new int[length];
-        // the weight of every invokers
+        // 存储每个Invoker的权重
         int[] weights = new int[length];
-        // The sum of the warmup weights of all the shortest response  invokers
+        // 存储权重总和
         int totalWeight = 0;
-        // The weight of the first shortest response invokers
+        // 记录第一个Invoker对象的权重
         int firstWeight = 0;
-        // Every shortest response invoker has the same weight value?
+        // 最短响应时间Invoker集合中的Invoker权重是否相同
         boolean sameWeight = true;
 
-        // Filter out all the shortest response invokers
         for (int i = 0; i < length; i++) {
             Invoker<T> invoker = invokers.get(i);
             RpcStatus rpcStatus = RpcStatus.getStatus(invoker.getUrl(), invocation.getMethodName());
-            // Calculate the estimated response time from the product of active connections and succeeded average elapsed time.
+            // 获取调用成功的平均时间，调用成功的请求数总数对应的总耗时 / 调用成功的请求数总数
             long succeededAverageElapsed = rpcStatus.getSucceededAverageElapsed();
+            // 获取的是该 Provider 当前的活跃请求数，也就是当前正在处理的请求数
             int active = rpcStatus.getActive();
+            // 计算一个处理新请求的预估值，也就是如果当前请求发给这个 Provider，大概耗时多久处理完成
             long estimateResponse = succeededAverageElapsed * active;
+            // 计算该 Invoker 的权重（主要是处理预热）
             int afterWarmup = getWeight(invoker, invocation);
             weights[i] = afterWarmup;
-            // Same as LeastActiveLoadBalance
+
             if (estimateResponse < shortestResponse) {
+                // 第一次找到 Invoker 集合中最短响应耗时的 Invoker 对象，记录其相关信息
                 shortestResponse = estimateResponse;
                 shortestCount = 1;
                 shortestIndexes[0] = i;
@@ -74,6 +77,7 @@ public class ShortestResponseLoadBalance extends AbstractLoadBalance {
                 firstWeight = afterWarmup;
                 sameWeight = true;
             } else if (estimateResponse == shortestResponse) {
+                // 出现多个耗时最短的 Invoker 对象
                 shortestIndexes[shortestCount++] = i;
                 totalWeight += afterWarmup;
                 if (sameWeight && i > 0
@@ -82,10 +86,12 @@ public class ShortestResponseLoadBalance extends AbstractLoadBalance {
                 }
             }
         }
+
         if (shortestCount == 1) {
             return invokers.get(shortestIndexes[0]);
         }
         if (!sameWeight && totalWeight > 0) {
+            // 如果耗时最短的所有 Invoker 对象的权重不相同，则通过加权随机负载均衡的方式选择一个 Invoker 返回
             int offsetWeight = ThreadLocalRandom.current().nextInt(totalWeight);
             for (int i = 0; i < shortestCount; i++) {
                 int shortestIndex = shortestIndexes[i];
@@ -95,6 +101,8 @@ public class ShortestResponseLoadBalance extends AbstractLoadBalance {
                 }
             }
         }
+
+        // 如果耗时最短的所有 Invoker 对象的权重相同，则随机返回一个
         return invokers.get(shortestIndexes[ThreadLocalRandom.current().nextInt(shortestCount)]);
     }
 }

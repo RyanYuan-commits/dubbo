@@ -33,9 +33,12 @@ import java.util.concurrent.ConcurrentMap;
 import static org.apache.dubbo.common.constants.CommonConstants.COMMA_SPLIT_PATTERN;
 
 /**
- * ConsistentHashLoadBalance
+ * ConsistentHashLoadBalance，让参数相同的请求每次都路由到相同的服务节点上；
+ * 传统的方式是进行哈希然后使用 provider 的数量对其取模，但是当一个 provider 宕机时，在极端情况下，所有请求的处理节点都
+ * 发生变化，为了避免这种情况，一致性哈希算法是对 2^32 取模
  */
 public class ConsistentHashLoadBalance extends AbstractLoadBalance {
+
     public static final String NAME = "consistenthash";
 
     /**
@@ -53,43 +56,72 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     @SuppressWarnings("unchecked")
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        // 将 ServiceKey 和方法名拼接起来，构成一个key
         String methodName = RpcUtils.getMethodName(invocation);
         String key = invokers.get(0).getUrl().getServiceKey() + "." + methodName;
-        // using the hashcode of list to compute the hash only pay attention to the elements in the list
+
+        // 如果 invokers 列表发生变化，需要重新生成 selector
         int invokersHashCode = invokers.hashCode();
         ConsistentHashSelector<T> selector = (ConsistentHashSelector<T>) selectors.get(key);
         if (selector == null || selector.identityHashCode != invokersHashCode) {
             selectors.put(key, new ConsistentHashSelector<T>(invokers, methodName, invokersHashCode));
             selector = (ConsistentHashSelector<T>) selectors.get(key);
         }
+
+        // 通过 ConsistentHashSelector 选择一个 invoker 对象
         return selector.select(invocation);
     }
 
     private static final class ConsistentHashSelector<T> {
 
+        /**
+         * 用于记录虚拟 Invoker 对象的 Hash 环
+         */
         private final TreeMap<Long, Invoker<T>> virtualInvokers;
 
+        /**
+         * 虚拟 Invoker 个数
+         */
         private final int replicaNumber;
 
+        /**
+         * Invoker 集合的 HashCode 值
+         */
         private final int identityHashCode;
 
+        /**
+         * 需要参与 Hash 计算的参数索引
+         * 例如，argumentIndex = [0, 1, 2] 时，表示调用的目标方法的前三个参数要参与 Hash 计算
+         */
         private final int[] argumentIndex;
 
         ConsistentHashSelector(List<Invoker<T>> invokers, String methodName, int identityHashCode) {
+            // 初始化哈希槽
             this.virtualInvokers = new TreeMap<Long, Invoker<T>>();
+            // 记录 invoker 集合的哈希码，用这个值判断 provider 列表是否发生了变化
             this.identityHashCode = identityHashCode;
             URL url = invokers.get(0).getUrl();
+            // 从 hash.nodes 参数中获取虚拟节点的个数
             this.replicaNumber = url.getMethodParameter(methodName, HASH_NODES, 160);
+
+            // 获取参与 Hash 计算的参数下标值，默认对第一个参数进行Hash运算
             String[] index = COMMA_SPLIT_PATTERN.split(url.getMethodParameter(methodName, HASH_ARGUMENTS, "0"));
             argumentIndex = new int[index.length];
             for (int i = 0; i < index.length; i++) {
                 argumentIndex[i] = Integer.parseInt(index[i]);
             }
+
+            // 构建虚拟Hash槽，默认replicaNumber=160，相当于在Hash槽上放160个槽位
+            // 外层轮询40次，内层轮询4次，共40*4=160次，也就是同一节点虚拟出160个槽位
             for (Invoker<T> invoker : invokers) {
                 String address = invoker.getUrl().getAddress();
                 for (int i = 0; i < replicaNumber / 4; i++) {
+                    // 对 address + i 进行 md5 运算，得到一个长度为 16 的字节数组
                     byte[] digest = md5(address + i);
                     for (int h = 0; h < 4; h++) {
+                        // h = 0 时，取 digest 中下标为 0~3 的 4 个字节进行位运算
+                        // h = 1 时，取 digest 中下标为 4~7 的 4 个字节进行位运算
+                        // h = 2 和 h = 3时，过程同上
                         long m = hash(digest, h);
                         virtualInvokers.put(m, invoker);
                     }
@@ -98,8 +130,11 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         }
 
         public Invoker<T> select(Invocation invocation) {
+            // 将参与一致性 Hash 的参数拼接到一起
             String key = toKey(invocation.getArguments());
+            // 计算 key 的哈希值
             byte[] digest = md5(key);
+            // 匹配 invoker 对象
             return selectForKey(hash(digest, 0));
         }
 
@@ -114,8 +149,10 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
         }
 
         private Invoker<T> selectForKey(long hash) {
+            // 找到第一个节点值大于或等于 hash 的对象
             Map.Entry<Long, Invoker<T>> entry = virtualInvokers.ceilingEntry(hash);
             if (entry == null) {
+                // hash 值大于 Hash 环中的所有 Invoker，则回到 Hash 环的开头，返回第一个 Invoker 对象
                 entry = virtualInvokers.firstEntry();
             }
             return entry.getValue();

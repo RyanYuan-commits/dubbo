@@ -22,7 +22,8 @@ import org.apache.dubbo.rpc.cluster.CacheableRouterFactory;
 import org.apache.dubbo.rpc.cluster.Router;
 
 /**
- * Tag router factory
+ * Tag router factory，通过将多个或者一个 provider 划分到统一分组，约束流量只在指定分组中流转，就可以实现流量隔离，从而
+ * 支持灰度发布等场景
  */
 @Activate(order = 100)
 public class TagRouterFactory extends CacheableRouterFactory {
@@ -33,4 +34,5 @@ public class TagRouterFactory extends CacheableRouterFactory {
     protected Router createRouter(URL url) {
         return new TagRouter(url);
     }
+
 }

@@ -24,6 +24,7 @@ import org.apache.dubbo.rpc.RpcException;
 import java.util.List;
 
 /**
+ * 路由器的抽象，请求经过 Router 时，会按照用户指定的规则匹配出符合条件的 Provider
  * Router. (SPI, Prototype, ThreadSafe)
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Routing">Routing</a>
@@ -83,7 +84,7 @@ public interface Router extends Comparable<Router> {
     boolean isForce();
 
     /**
-     * Router's priority, used to sort routers.
+     * Router 优先级，用于排序
      *
      * @return router's priority
      */
@@ -96,4 +97,5 @@ public interface Router extends Comparable<Router> {
         }
         return Integer.compare(this.getPriority(), o.getPriority());
     }
+
 }

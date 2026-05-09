@@ -36,9 +36,10 @@ import static org.apache.dubbo.rpc.cluster.Constants.WEIGHT_KEY;
  * AbstractLoadBalance
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
+
     /**
-     * Calculate the weight according to the uptime proportion of warmup time
-     * the new weight will be within 1(inclusive) to weight(inclusive)
+     * 对还在预热状态的 Provider 节点进行降权，避免 Provider 一启动就有大量请求涌进来
+     * 计算出来的权重在 1 到 weight 之间
      *
      * @param uptime the uptime in milliseconds
      * @param warmup the warmup time in milliseconds
@@ -52,6 +53,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
     @Override
     public <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) {
+        // 处理 invoker 集合为空和 invoker 集合仅有一个元素的情况
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
@@ -65,6 +67,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
 
     /**
+     * 用于计算 Provider 权重
      * Get the weight of the invoker's invocation which takes warmup time into account
      * if the uptime is within the warmup time, the weight will be reduce proportionally
      *
@@ -77,18 +80,23 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         URL url = invoker.getUrl();
         // Multiple registry scenario, load balance among multiple registries.
         if (REGISTRY_SERVICE_REFERENCE_PATH.equals(url.getServiceInterface())) {
+            // 如果是 RegistryService 接口的话，直接获取权重即可
             weight = url.getParameter(REGISTRY_KEY + "." + WEIGHT_KEY, DEFAULT_WEIGHT);
         } else {
             weight = url.getMethodParameter(invocation.getMethodName(), WEIGHT_KEY, DEFAULT_WEIGHT);
             if (weight > 0) {
+                // 获取服务提供者的启动时间戳
                 long timestamp = invoker.getUrl().getParameter(TIMESTAMP_KEY, 0L);
                 if (timestamp > 0L) {
+                    // 计算 Provider 的运行时间
                     long uptime = System.currentTimeMillis() - timestamp;
                     if (uptime < 0) {
                         return 1;
                     }
+                    // 计算 Provider 的预热时长
                     int warmup = invoker.getUrl().getParameter(WARMUP_KEY, DEFAULT_WARMUP);
                     if (uptime > 0 && uptime < warmup) {
+                        // 启动时间小于预热时间，该节点可能还在预热状态，需要重新计算权重
                         weight = calculateWarmupWeight((int)uptime, warmup, weight);
                     }
                 }
@@ -96,4 +104,5 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         }
         return Math.max(weight, 0);
     }
+
 }

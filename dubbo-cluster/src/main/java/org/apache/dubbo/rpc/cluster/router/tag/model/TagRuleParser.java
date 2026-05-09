@@ -22,7 +22,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 /**
- *
+ * 解析 yaml 格式的 TagRouterRule 配置
  */
 public class TagRuleParser {
 

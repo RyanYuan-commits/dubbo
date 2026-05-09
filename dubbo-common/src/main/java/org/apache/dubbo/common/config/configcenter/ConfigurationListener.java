@@ -30,4 +30,5 @@ public interface ConfigurationListener extends EventListener {
      * @param event config change event
      */
     void process(ConfigChangedEvent event);
+
 }

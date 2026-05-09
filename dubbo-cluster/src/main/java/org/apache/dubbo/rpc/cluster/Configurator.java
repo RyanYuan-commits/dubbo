@@ -33,19 +33,18 @@ import static org.apache.dubbo.rpc.cluster.Constants.PRIORITY_KEY;
 
 /**
  * Configurator. (SPI, Prototype, ThreadSafe)
- *
  */
 public interface Configurator extends Comparable<Configurator> {
 
     /**
-     * Get the configurator url.
+     * 获取该 Configurator 对象对应的配置URL
      *
      * @return configurator url.
      */
     URL getUrl();
 
     /**
-     * Configure the provider url.
+     * 返回经过 Configurator 修改后的URL
      *
      * @param url - old provider url.
      * @return new provider url.
@@ -54,10 +53,9 @@ public interface Configurator extends Comparable<Configurator> {
 
 
     /**
-     * Convert override urls to map for use when re-refer. Send all rules every time, the urls will be reassembled and
-     * calculated
-     *
-     * URL contract:
+     * 将多个配置 URL 对象解析成相应的 Configurator 对象
+     * 将 override urls 转化为 map 结构，以便在重新引用时使用，每次都会推送全部规则，这些 URL 会被重新组装并计算
+     * URL 协议：
      * <ol>
      * <li>override://0.0.0.0/...( or override://ip:port...?anyhost=true)&para1=value1... means global rules
      * (all of the providers take effect)</li>
@@ -74,31 +72,37 @@ public interface Configurator extends Comparable<Configurator> {
             return Optional.empty();
         }
 
+        // 创建 ConfiguratorFactory 适配器
         ConfiguratorFactory configuratorFactory = ExtensionLoader.getExtensionLoader(ConfiguratorFactory.class)
                 .getAdaptiveExtension();
 
         List<Configurator> configurators = new ArrayList<>(urls.size());
         for (URL url : urls) {
             if (EMPTY_PROTOCOL.equals(url.getProtocol())) {
+                // 遇到 empty 协议，直接清空 configurators 集合，结束解析，返回空集合
                 configurators.clear();
                 break;
             }
+
             Map<String, String> override = new HashMap<>(url.getParameters());
-            //The anyhost parameter of override may be added automatically, it can't change the judgement of changing url
             override.remove(ANYHOST_KEY);
             if (CollectionUtils.isEmptyMap(override)) {
+                // 该配置没有携带任何参数，跳过
                 continue;
             }
+
+            // 创建对应的 Configurator 实例
             configurators.add(configuratorFactory.getConfigurator(url));
         }
+
+        // 排序
         Collections.sort(configurators);
         return Optional.of(configurators);
     }
 
     /**
-     * Sort by host, then by priority
-     * 1. the url with a specific host ip should have higher priority than 0.0.0.0
-     * 2. if two url has the same host, compare by priority value；
+     * 首先按照 ip 进行排序，所有 ip 的优先级都高于 0.0.0.0；
+     * 当ip相同时，按照 priority 值进行排序；
      */
     @Override
     default int compareTo(Configurator o) {
@@ -116,4 +120,5 @@ public interface Configurator extends Comparable<Configurator> {
             return ipCompare;
         }
     }
+
 }

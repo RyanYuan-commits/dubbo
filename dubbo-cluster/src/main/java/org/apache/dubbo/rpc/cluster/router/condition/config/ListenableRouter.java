@@ -39,9 +39,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Abstract router which listens to dynamic configuration
+ * 在 ConditionRouter 的基础上添加动态配置能力
  */
 public abstract class ListenableRouter extends AbstractRouter implements ConfigurationListener {
+
     public static final String NAME = "LISTENABLE_ROUTER";
     private static final String RULE_SUFFIX = ".condition-router";
 
@@ -63,6 +64,7 @@ public abstract class ListenableRouter extends AbstractRouter implements Configu
         }
 
         if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
+            // 触发 DELETE 事件时清空配置
             routerRule = null;
             conditionRouters = Collections.emptyList();
         } else {
@@ -82,7 +84,7 @@ public abstract class ListenableRouter extends AbstractRouter implements Configu
             return invokers;
         }
 
-        // We will check enabled status inside each router.
+        // 使用路由规则进行过滤
         for (Router router : conditionRouters) {
             invokers = router.route(invokers, url, invocation);
         }
@@ -124,4 +126,5 @@ public abstract class ListenableRouter extends AbstractRouter implements Configu
             this.process(new ConfigChangedEvent(routerKey, DynamicConfiguration.DEFAULT_GROUP, rule));
         }
     }
+
 }

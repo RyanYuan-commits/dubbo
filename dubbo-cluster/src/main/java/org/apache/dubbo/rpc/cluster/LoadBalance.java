@@ -27,9 +27,18 @@ import org.apache.dubbo.rpc.cluster.loadbalance.RandomLoadBalance;
 import java.util.List;
 
 /**
- * LoadBalance. (SPI, Singleton, ThreadSafe)
+ * 负载均衡接口，Consumer 按照指定的负载均衡策略，从 Provider 集合中选出一个最合适的 Provider 节点来处理请求。
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Load_balancing_(computing)">Load-Balancing</a>
+ * <p>
+ * Dubbo 提供了五种负载均衡实现：
+ * <ol>
+ *  <li> 基于哈希一致性：{@link org.apache.dubbo.rpc.cluster.loadbalance.ConsistentHashLoadBalance} </li>
+ *  <li> 基于权重随机算法（默认）：{@link RandomLoadBalance} </li>
+ *  <li> 基于最少活跃调用数算法：{@link org.apache.dubbo.rpc.cluster.loadbalance.LeastActiveLoadBalance} </li>
+ *  <li> 基于加权轮询算法：{@link org.apache.dubbo.rpc.cluster.loadbalance.RoundRobinLoadBalance} </li>
+ *  <li> 基于最短响应时间：{@link org.apache.dubbo.rpc.cluster.loadbalance.ShortestResponseLoadBalance} </li>
+ * </ol>
  *
  * @see org.apache.dubbo.rpc.cluster.Cluster#join(Directory)
  */
@@ -37,7 +46,7 @@ import java.util.List;
 public interface LoadBalance {
 
     /**
-     * select one invoker in list.
+     * 从 invoker list 中选择一个 invoker
      *
      * @param invokers   invokers.
      * @param url        refer url

@@ -28,16 +28,29 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Round robin load balance.
+ * Round-robin load balance，加权轮询负载均衡算法
  */
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
+
     public static final String NAME = "roundrobin";
 
     private static final int RECYCLE_PERIOD = 60000;
 
     protected static class WeightedRoundRobin {
+
+        /**
+         * 配置的权重
+         */
         private int weight;
+
+        /**
+         * 随每次负载均衡算法变化的权重
+         */
         private AtomicLong current = new AtomicLong(0);
+
+        /**
+         * 权重最新的更新时间
+         */
         private long lastUpdate;
 
         public int getWeight() {
@@ -89,15 +102,18 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
     @Override
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
         String key = invokers.get(0).getUrl().getServiceKey() + "." + invocation.getMethodName();
+        // invoker 与 weightedRoundRobin 的映射表
         ConcurrentMap<String, WeightedRoundRobin> map = methodWeightMap.computeIfAbsent(key, k -> new ConcurrentHashMap<>());
         int totalWeight = 0;
         long maxCurrent = Long.MIN_VALUE;
+        // 获取当前时间
         long now = System.currentTimeMillis();
         Invoker<T> selectedInvoker = null;
         WeightedRoundRobin selectedWRR = null;
         for (Invoker<T> invoker : invokers) {
             String identifyString = invoker.getUrl().toIdentityString();
             int weight = getWeight(invoker, invocation);
+            // 获取或创建当前 invoker 对应的 weightedRoundRobin 对象
             WeightedRoundRobin weightedRoundRobin = map.computeIfAbsent(identifyString, k -> {
                 WeightedRoundRobin wrr = new WeightedRoundRobin();
                 wrr.setWeight(weight);
@@ -105,26 +121,32 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
             });
 
             if (weight != weightedRoundRobin.getWeight()) {
-                //weight changed
+                // invoker 权重发生了变化
                 weightedRoundRobin.setWeight(weight);
             }
+
+            // 计算 currentWeight
             long cur = weightedRoundRobin.increaseCurrent();
             weightedRoundRobin.setLastUpdate(now);
             if (cur > maxCurrent) {
+                // 寻找具有最大 currentWeight 的 invoker
                 maxCurrent = cur;
                 selectedInvoker = invoker;
                 selectedWRR = weightedRoundRobin;
             }
+            // 计算权重总和
             totalWeight += weight;
         }
         if (invokers.size() != map.size()) {
             map.entrySet().removeIf(item -> now - item.getValue().getLastUpdate() > RECYCLE_PERIOD);
         }
         if (selectedInvoker != null) {
+            // 用currentWeight减去totalWeight
             selectedWRR.sel(totalWeight);
+            // 返回选中的Invoker对象
             return selectedInvoker;
         }
-        // should not happen here
+
         return invokers.get(0);
     }
 

@@ -22,16 +22,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * If you want to provide a router implementation based on design of v2.7.0, please extend from this abstract class.
- * For 2.6.x style router, please implement and use RouterFactory directly.
+ * 基于 service_key 的 router factory
  */
 public abstract class CacheableRouterFactory implements RouterFactory {
+
+    /**
+     * {service_key:router}
+     */
     private ConcurrentMap<String, Router> routerMap = new ConcurrentHashMap<>();
 
     @Override
     public Router getRouter(URL url) {
+        // 查询失败会通过 createRouter 基于 service_key 创建 Router
         return routerMap.computeIfAbsent(url.getServiceKey(), k -> createRouter(url));
     }
 
     protected abstract Router createRouter(URL url);
+
 }

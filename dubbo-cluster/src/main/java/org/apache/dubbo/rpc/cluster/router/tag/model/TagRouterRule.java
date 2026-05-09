@@ -41,9 +41,20 @@ import java.util.stream.Collectors;
  * ...
  */
 public class TagRouterRule extends AbstractRouterRule {
+
+    /**
+     * tag 集合，维护 tag_name 和 address list
+     */
     private List<Tag> tags;
 
+    /**
+     * {address:tag_name}
+     */
     private Map<String, List<String>> addressToTagnames = new HashMap<>();
+
+    /**
+     * {tag_name:address}
+     */
     private Map<String, List<String>> tagnameToAddresses = new HashMap<>();
 
     public void init() {
@@ -87,4 +98,5 @@ public class TagRouterRule extends AbstractRouterRule {
     public void setTags(List<Tag> tags) {
         this.tags = tags;
     }
+
 }

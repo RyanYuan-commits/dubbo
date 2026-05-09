@@ -47,7 +47,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.RUNTIME_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.TYPE_KEY;
 
 /**
- * ScriptRouter
+ * ScriptRouter, 支持 JDK 脚本引擎的所有脚本，例如，JavaScript、JRuby、Groovy 等，通过 type=javascript 参数设置脚本类型，
+ * 缺省为 javascript。
  */
 public class ScriptRouter extends AbstractRouter {
     public static final String NAME = "SCRIPT_ROUTER";
