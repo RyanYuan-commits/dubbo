@@ -49,7 +49,7 @@ public class ConsumerContextFilter implements Filter {
         // 记录 Invoker 与 Invocation
         context.setInvoker(invoker)
                 .setInvocation(invocation)
-                // 记录伯尔尼的地址和远端地址
+                // 记录 Consumer 的地址和远端地址
                 .setLocalAddress(NetUtils.getLocalHost(), 0)
                 .setRemoteAddress(invoker.getUrl().getHost(), invoker.getUrl().getPort())
                 // 记录远端应用名称

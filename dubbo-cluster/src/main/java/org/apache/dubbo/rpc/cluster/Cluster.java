@@ -38,15 +38,13 @@ import org.apache.dubbo.rpc.cluster.support.FailoverCluster;
  */
 @SPI(Cluster.DEFAULT)
 public interface Cluster {
+
     String DEFAULT = FailoverCluster.NAME;
 
     /**
-     * Merge the directory invokers to a virtual invoker.
+     * 将 directory 中的 invoker 合并为一个虚拟 invoker
      *
-     * @param <T>
-     * @param directory
      * @return cluster invoker
-     * @throws RpcException
      */
     @Adaptive
     <T> Invoker<T> join(Directory<T> directory) throws RpcException;

@@ -36,10 +36,13 @@ public abstract class AbstractCluster implements Cluster {
 
     private <T> Invoker<T> buildClusterInterceptors(AbstractClusterInvoker<T> clusterInvoker, String key) {
         AbstractClusterInvoker<T> last = clusterInvoker;
-        List<ClusterInterceptor> interceptors = ExtensionLoader.getExtensionLoader(ClusterInterceptor.class).getActivateExtension(clusterInvoker.getUrl(), key);
+        // 通过 SPI 加载 interceptor
+        List<ClusterInterceptor> interceptors = ExtensionLoader.getExtensionLoader(ClusterInterceptor.class).
+                getActivateExtension(clusterInvoker.getUrl(), key);
 
         if (!interceptors.isEmpty()) {
             for (int i = interceptors.size() - 1; i >= 0; i--) {
+                // 首尾连接 interceptor，组成调用链
                 final ClusterInterceptor interceptor = interceptors.get(i);
                 final AbstractClusterInvoker<T> next = last;
                 last = new InterceptorInvokerNode<>(clusterInvoker, interceptor, next);
@@ -48,6 +51,9 @@ public abstract class AbstractCluster implements Cluster {
         return last;
     }
 
+    /**
+     * 在 ClusterInvoker 外部包一层 {@link ClusterInterceptor}
+     */
     @Override
     public <T> Invoker<T> join(Directory<T> directory) throws RpcException {
         return buildClusterInterceptors(doJoin(directory), directory.getUrl().getParameter(REFERENCE_INTERCEPTOR_KEY));
@@ -88,16 +94,19 @@ public abstract class AbstractCluster implements Cluster {
         public Result invoke(Invocation invocation) throws RpcException {
             Result asyncResult;
             try {
+                // 执行前置逻辑
                 interceptor.before(next, invocation);
+                // 完成远程调用
                 asyncResult = interceptor.intercept(next, invocation);
             } catch (Exception e) {
-                // onError callback
+                // 出现异常时，会触发监听器的onError()方法
                 if (interceptor instanceof ClusterInterceptor.Listener) {
                     ClusterInterceptor.Listener listener = (ClusterInterceptor.Listener) interceptor;
                     listener.onError(e, clusterInvoker, invocation);
                 }
                 throw e;
             } finally {
+                // 执行后置逻辑
                 interceptor.after(next, invocation);
             }
             return asyncResult.whenCompleteWithContext((r, t) -> {
