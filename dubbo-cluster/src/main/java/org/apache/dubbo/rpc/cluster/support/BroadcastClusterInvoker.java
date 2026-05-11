@@ -29,8 +29,7 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import java.util.List;
 
 /**
- * BroadcastClusterInvoker
- *
+ * BroadcastClusterInvoker，逐个调用每个 Provider 节点，其中任意一个 Provider 节点报错，都会在全部调用结束之后抛出异常
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 

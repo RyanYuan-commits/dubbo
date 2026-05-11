@@ -26,7 +26,8 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import java.util.List;
 
 /**
- * AvailableCluster
+ * AvailableCluster，逐个调用对应的 Provider 节点，当遇到第一个可用的 Provider 节点时，就尝试访问该 Provider 节点，
+ * 成功则返回结果；如果访问失败，则抛出异常终止遍历。
  *
  */
 public class AvailableClusterInvoker<T> extends AbstractClusterInvoker<T> {

@@ -44,7 +44,7 @@ import static org.apache.dubbo.rpc.Constants.ASYNC_KEY;
 import static org.apache.dubbo.rpc.Constants.MERGER_KEY;
 
 /**
- * @param <T>
+ * 对多个 Provider 节点返回结果合并
  */
 @SuppressWarnings("unchecked")
 public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
@@ -59,23 +59,32 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
     protected Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         checkInvokers(invokers, invocation);
         String merger = getUrl().getMethodParameter(invocation.getMethodName(), MERGER_KEY);
-        if (ConfigUtils.isEmpty(merger)) { // If a method doesn't have a merger, only invoke one Group
+        // 判断要调用的目标方法是否有合并器，如果没有，则不会进行合并，
+        // 找到第一个可用的 Invoker 直接调用并返回结果
+        if (ConfigUtils.isEmpty(merger)) {
+            // 没有合成器，不进行合并，返回第一个调用成功的结果
             for (final Invoker<T> invoker : invokers) {
                 if (invoker.isAvailable()) {
                     try {
                         return invoker.invoke(invocation);
                     } catch (RpcException e) {
                         if (e.isNoInvokerAvailableAfterFilter()) {
-                            log.debug("No available provider for service" + getUrl().getServiceKey() + " on group " + invoker.getUrl().getParameter(GROUP_KEY) + ", will continue to try another group.");
+                            // 仅仅是当前这个组没有可用节点，记录日志，继续尝试循环中的下一个组
+                            log.debug("No available provider for service" + getUrl().getServiceKey() +
+                                    " on group " + invoker.getUrl().getParameter(GROUP_KEY) +
+                                    ", will continue to try another group.");
                         } else {
+                            // 其他异常日志，直接抛出
                             throw e;
                         }
                     }
                 }
             }
+            // 强制取出第一个做最后一次尝试
             return invokers.iterator().next().invoke(invocation);
         }
 
+        // 确定目标方法的返回值类型
         Class<?> returnType;
         try {
             returnType = getInterface().getMethod(
@@ -84,6 +93,7 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
             returnType = null;
         }
 
+        // 调用每个 Invoker 对象(异步方式)，将请求结果记录到 results 集合中
         Map<String, Result> results = new HashMap<>();
         for (final Invoker<T> invoker : invokers) {
             RpcInvocation subInvocation = new RpcInvocation(invocation, invoker);
@@ -95,6 +105,7 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
         List<Result> resultList = new ArrayList<Result>(results.size());
 
+        // 等待结果返回
         for (Map.Entry<String, Result> entry : results.entrySet()) {
             Result asyncResult = entry.getValue();
             try {
@@ -122,6 +133,8 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
         }
 
         if (merger.startsWith(".")) {
+            // merger如果以 "." 开头，后面为方法名，这个方法名是远程目标方法的返回类型中的方法
+            // 得到每个 Provider 节点返回的结果对象之后，会遍历每个返回对象，调用 merger 参数指定的方法
             merger = merger.substring(1);
             Method method;
             try {
@@ -133,6 +146,8 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
             if (!Modifier.isPublic(method.getModifiers())) {
                 method.setAccessible(true);
             }
+            // resultList 集合保存了所有的返回对象，method 是 Method 对象，也就是 merger 指定的方法
+            // result 是最后返回调用方的结果
             result = resultList.remove(0).getValue();
             try {
                 if (method.getReturnType() != void.class
@@ -151,6 +166,7 @@ public class MergeableClusterInvoker<T> extends AbstractClusterInvoker<T> {
         } else {
             Merger resultMerger;
             if (ConfigUtils.isDefault(merger)) {
+                // merger 参数为 true 或者default，表示使用默认的 Merger 扩展实现完成合并
                 resultMerger = MergerFactory.getMerger(returnType);
             } else {
                 resultMerger = ExtensionLoader.getExtensionLoader(Merger.class).getExtension(merger);

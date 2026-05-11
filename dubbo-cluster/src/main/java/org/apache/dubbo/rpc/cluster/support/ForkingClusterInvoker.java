@@ -40,10 +40,10 @@ import static org.apache.dubbo.common.constants.CommonConstants.TIMEOUT_KEY;
 import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_FORKS;
 
 /**
- * NOTICE! This implementation does not work well with async call.
- *
- * Invoke a specific number of invokers concurrently, usually used for demanding real-time operations, but need to waste more service resources.
- *
+ * 并发调用多个 Provider 节点，只要有一个 Provider 节点成功返回了结果，调用就会立即结束运行，用于应对一些实时性
+ * 要求较高的读操作
+ * <b>在异步调用时不建议使用该方式！</b>
+ * <p>
  * <a href="http://en.wikipedia.org/wiki/Fork_(topology)">Fork</a>
  */
 public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
@@ -63,24 +63,30 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(final Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         try {
+            // 检查 invoker 是否为空
             checkInvokers(invokers, invocation);
             final List<Invoker<T>> selected;
+            // 从 URL 中获取 forks 参数，作为并发请求上限，默认值为 2
             final int forks = getUrl().getParameter(FORKS_KEY, DEFAULT_FORKS);
             final int timeout = getUrl().getParameter(TIMEOUT_KEY, DEFAULT_TIMEOUT);
             if (forks <= 0 || forks >= invokers.size()) {
+                // forks 大于 invokers 长度，并发调用所有 invoker
                 selected = invokers;
             } else {
                 selected = new ArrayList<>(forks);
                 while (selected.size() < forks) {
                     Invoker<T> invoker = select(loadbalance, invocation, invokers, selected);
                     if (!selected.contains(invoker)) {
-                        //Avoid add the same invoker several times.
+                        // 避免重复选择
                         selected.add(invoker);
                     }
                 }
             }
+
             RpcContext.getContext().setInvokers((List) selected);
+            // 记录失败的请求个数
             final AtomicInteger count = new AtomicInteger();
+            // 记录请求结果
             final BlockingQueue<Object> ref = new LinkedBlockingQueue<>();
             for (final Invoker<T> invoker : selected) {
                 executor.execute(() -> {
@@ -95,7 +101,9 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
                     }
                 });
             }
+
             try {
+                // 阻塞等待请求结果出现
                 Object ret = ref.poll(timeout, TimeUnit.MILLISECONDS);
                 if (ret instanceof Throwable) {
                     Throwable e = (Throwable) ret;
@@ -106,8 +114,9 @@ public class ForkingClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 throw new RpcException("Failed to forking invoke provider " + selected + ", but no luck to perform the invocation. Last error is: " + e.getMessage(), e);
             }
         } finally {
-            // clear attachments which is binding to current thread.
+            // 清除上下文信息
             RpcContext.getContext().clearAttachments();
         }
     }
+
 }

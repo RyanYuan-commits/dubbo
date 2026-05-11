@@ -41,9 +41,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.DEFAULT_FAILBACK_TASKS;
 import static org.apache.dubbo.rpc.cluster.Constants.FAIL_BACK_TASKS_KEY;
 
 /**
- * When fails, record failure requests and schedule for retry on a regular interval.
- * Especially useful for services of notification.
- *
+ * 在请求失败之后，返回一个空结果给 Consumer，作为通知，同时还会添加一个定时任务对失败的请求进行重试
+ * <p>
  * <a href="http://en.wikipedia.org/wiki/Failback">Failback</a>
  */
 public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
@@ -77,6 +76,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         if (failTimer == null) {
             synchronized (this) {
                 if (failTimer == null) {
+                    // 初始化时间轮，共有 32 个槽，每个槽表示 1s
                     failTimer = new HashedWheelTimer(
                             new NamedThreadFactory("failback-cluster-timer", true),
                             1,
@@ -84,6 +84,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 }
             }
         }
+        // 创建定时任务，默认重试三次
         RetryTimerTask retryTimerTask = new RetryTimerTask(loadbalance, invocation, invokers, lastInvoker, retries, RETRY_FAILED_PERIOD);
         try {
             failTimer.newTimeout(retryTimerTask, RETRY_FAILED_PERIOD, TimeUnit.SECONDS);
@@ -96,10 +97,14 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
     protected Result doInvoke(Invocation invocation, List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         Invoker<T> invoker = null;
         try {
+            // 检查 invoker 集合是否为空
             checkInvokers(invokers, invocation);
+            // 选择一个 invoker
             invoker = select(loadbalance, invocation, invokers, null);
+            // 完成远程调用
             return invoker.invoke(invocation);
         } catch (Throwable e) {
+            // 调用失败后，添加一个定时任务进行重试
             logger.error("Failback to invoke method " + invocation.getMethodName() + ", wait for retry in background. Ignored exception: "
                     + e.getMessage() + ", ", e);
             addFailed(loadbalance, invocation, invokers, invoker);
@@ -119,6 +124,7 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
      * RetryTimerTask
      */
     private class RetryTimerTask implements TimerTask {
+
         private final Invocation invocation;
         private final LoadBalance loadbalance;
         private final List<Invoker<T>> invokers;
@@ -139,8 +145,10 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
         @Override
         public void run(Timeout timeout) {
             try {
+                // 重新选择 invoker 对象，会将上一次调用的 invoker 传入 selected 参数
                 Invoker<T> retryInvoker = select(loadbalance, invocation, invokers, Collections.singletonList(lastInvoker));
                 lastInvoker = retryInvoker;
+                // 请求对应的 Provider 节点
                 retryInvoker.invoke(invocation);
             } catch (Throwable e) {
                 logger.error("Failed retry to invoke method " + invocation.getMethodName() + ", waiting again.", e);
@@ -159,10 +167,13 @@ public class FailbackClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
             Timer timer = timeout.timer();
             if (timer.isStop() || timeout.isCancelled()) {
+                // 检查时间轮和任务状态
                 return;
             }
 
+            // 重新添加定时任务
             timer.newTimeout(timeout.task(), tick, TimeUnit.SECONDS);
         }
     }
+
 }

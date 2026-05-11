@@ -295,7 +295,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         List<URL> routerURLs = categoryUrls.getOrDefault(ROUTERS_CATEGORY, Collections.emptyList());
         toRouters(routerURLs).ifPresent(this::addRouters);
 
-        // 获取 providers 类型的 URL，调用r efreshOverrideAndInvoker() 方法进行处理
+        // 获取 providers 类型的 URL，调用 refreshOverrideAndInvoker() 方法进行处理
         List<URL> providerURLs = categoryUrls.getOrDefault(PROVIDERS_CATEGORY, Collections.emptyList());
         /*
          * 在 Dubbo3.0 中会触发 AddressListener 监听器，但是现在 AddressListener 接口还没有实现

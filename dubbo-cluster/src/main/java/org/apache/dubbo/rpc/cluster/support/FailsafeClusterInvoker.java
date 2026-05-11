@@ -29,9 +29,9 @@ import org.apache.dubbo.rpc.cluster.LoadBalance;
 import java.util.List;
 
 /**
- * When invoke fails, log the error message and ignore this error by returning an empty Result.
+ * 只会进行一次请求，请求失败之后会返回一个空结果
  * Usually used to write audit logs and other operations
- *
+ * <p>
  * <a href="http://en.wikipedia.org/wiki/Fail-safe">Fail-safe</a>
  *
  */

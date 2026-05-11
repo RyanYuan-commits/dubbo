@@ -25,36 +25,43 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @see org.apache.dubbo.rpc.cluster.support.MergeableClusterInvoker
+ */
 public class MergerFactory {
 
     private static final ConcurrentMap<Class<?>, Merger<?>> MERGER_CACHE =
             new ConcurrentHashMap<Class<?>, Merger<?>>();
 
     /**
-     * Find the merger according to the returnType class, the merger will
-     * merge an array of returnType into one
+     * 根据返回值类型选择合适的 merger
      *
-     * @param returnType the merger will return this type
+     * @param returnType 从 merger 会得到这个类型的结果
      * @return the merger which merges an array of returnType into one, return null if not exist
      * @throws IllegalArgumentException if returnType is null
      */
     public static <T> Merger<T> getMerger(Class<T> returnType) {
         if (returnType == null) {
+            // returnType 为空，直接抛出异常
             throw new IllegalArgumentException("returnType is null");
         }
 
         Merger result;
         if (returnType.isArray()) {
+            // 数组类型的 return type
             Class type = returnType.getComponentType();
+            // 获取元素对应的 Merger 实现
             result = MERGER_CACHE.get(type);
             if (result == null) {
                 loadMergers();
                 result = MERGER_CACHE.get(type);
             }
+            // 如果 Dubbo 没有提供元素类型对应的 Merger 实现，就返回 ArrayMerger
             if (result == null && !type.isPrimitive()) {
                 result = ArrayMerger.INSTANCE;
             }
         } else {
+            // 从缓存中查找对应的 Merger 实例
             result = MERGER_CACHE.get(returnType);
             if (result == null) {
                 loadMergers();
@@ -65,9 +72,11 @@ public class MergerFactory {
     }
 
     static void loadMergers() {
+        // 获取 Merger 接口的所有扩展名称
         Set<String> names = ExtensionLoader.getExtensionLoader(Merger.class)
                 .getSupportedExtensions();
         for (String name : names) {
+            // 遍历所有 Merger 扩展实现
             Merger m = ExtensionLoader.getExtensionLoader(Merger.class).getExtension(name);
             MERGER_CACHE.putIfAbsent(ReflectUtils.getGenericClass(m.getClass()), m);
         }

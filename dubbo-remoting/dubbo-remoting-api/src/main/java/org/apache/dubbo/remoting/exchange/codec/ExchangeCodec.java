@@ -229,6 +229,7 @@ public class ExchangeCodec extends TelnetCodec {
 
         // encode request data.
         int savedWriteIndex = buffer.writerIndex();
+        // 将写入指针跳过请求头的长度，先写入 Body
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
         ChannelBufferOutputStream bos = new ChannelBufferOutputStream(buffer);
         ObjectOutput out = serialization.serialize(channel.getUrl(), bos);
@@ -243,13 +244,15 @@ public class ExchangeCodec extends TelnetCodec {
         }
         bos.flush();
         bos.close();
+        // 计算 Body 长度，填到 header 中
         int len = bos.writtenBytes();
         checkPayload(channel, len);
         Bytes.int2bytes(len, header, 12);
 
-        // write
+        // 切换 write index 以写入 header
         buffer.writerIndex(savedWriteIndex);
-        buffer.writeBytes(header); // write header.
+        // 写入 header
+        buffer.writeBytes(header);
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH + len);
     }
 
