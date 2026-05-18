@@ -82,31 +82,31 @@ public class MockClusterInvoker<T> implements ClusterInvoker<T> {
     public Result invoke(Invocation invocation) throws RpcException {
         Result result = null;
 
+        // 获取 URL 中名为 mock 的 key，判断是否开启了 mock 机制
         String value = getUrl().getMethodParameter(invocation.getMethodName(), MOCK_KEY, Boolean.FALSE.toString()).trim();
         if (value.length() == 0 || "false".equalsIgnoreCase(value)) {
-            //no mock
+            // 没有开启 mock 机制
             result = this.invoker.invoke(invocation);
         } else if (value.startsWith("force")) {
+            // mock 机制被强制开启
             if (logger.isWarnEnabled()) {
                 logger.warn("force-mock: " + invocation.getMethodName() + " force-mock enabled , url : " + getUrl());
             }
-            //force:direct mock
             result = doMockInvoke(invocation, null);
         } else {
-            //fail-mock
+            // 调用原始 invoker 失败时才调用 mock invoker
             try {
                 result = this.invoker.invoke(invocation);
 
-                //fix:#4585
+                // fix:#4585
                 if(result.getException() != null && result.getException() instanceof RpcException){
-                    RpcException rpcException= (RpcException)result.getException();
+                    RpcException rpcException = (RpcException)result.getException();
                     if(rpcException.isBiz()){
-                        throw  rpcException;
+                        throw rpcException;
                     }else {
                         result = doMockInvoke(invocation, rpcException);
                     }
                 }
-
             } catch (RpcException e) {
                 if (e.isBiz()) {
                     throw e;

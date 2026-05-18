@@ -19,7 +19,7 @@ package org.apache.dubbo.remoting;
 import org.apache.dubbo.common.Resetable;
 
 /**
- * 代表作为对端的客户端 (API/SPI, Prototype, ThreadSafe)
+ * 客户端 (API/SPI, Prototype, ThreadSafe)
  *
  * @see org.apache.dubbo.remoting.Transporter#connect(org.apache.dubbo.common.URL, ChannelHandler)
  */

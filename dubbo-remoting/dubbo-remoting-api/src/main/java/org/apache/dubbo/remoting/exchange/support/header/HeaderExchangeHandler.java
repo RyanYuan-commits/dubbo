@@ -110,6 +110,7 @@ public class HeaderExchangeHandler implements ChannelHandlerDelegate {
                         res.setStatus(Response.OK);
                         res.setResult(appResult);
                     } else {
+                        // 异常情况
                         res.setStatus(Response.SERVICE_ERROR);
                         res.setErrorMessage(StringUtils.toString(t));
                     }

@@ -20,7 +20,8 @@ import org.apache.dubbo.remoting.Client;
 
 /**
  * ExchangeClient. (API/SPI, Prototype, ThreadSafe)
- *
+ * 一个 ExchangeClient 通常对应一个物理 TCP 连接，根据配置，多个服务可以共享同一个 ExchangeClient，也可以每个服务有自己
+ * 独立的 ExchangeClient
  *
  */
 public interface ExchangeClient extends Client, ExchangeChannel {

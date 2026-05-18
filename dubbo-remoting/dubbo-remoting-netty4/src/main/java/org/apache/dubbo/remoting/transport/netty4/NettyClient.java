@@ -73,7 +73,7 @@ public class NettyClient extends AbstractClient {
      * 初始化并启动 netty
      */
     public NettyClient(final URL url, final ChannelHandler handler) throws RemotingException {
-    	// handler 会被包装: MultiMessageHandler->HeartbeatHandler->handler
+    	// handler 会被包装: MultiMessageHandler->HeartbeatHandler-> Dispatcher handler -> 参数中的 handler
     	super(url, wrapChannelHandler(url, handler));
     }
 

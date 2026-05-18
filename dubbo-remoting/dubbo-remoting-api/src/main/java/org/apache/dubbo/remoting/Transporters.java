@@ -59,6 +59,14 @@ public class Transporters {
         return connect(URL.valueOf(url), handler);
     }
 
+    /**
+     * 获取连接，包含对 Handler 的特殊处理逻辑，如果包含多个 handler，将其包装为 ChannelHandlerDispatcher，将事件分发给
+     * 这些 handlers
+     *
+     * @param url url
+     * @param handlers exchange handler，具体为：DecodeHandler -> HeaderExchangeHandler -> handler
+     * @return Transport 对应的 Client，如 NettyClient
+     */
     public static Client connect(URL url, ChannelHandler... handlers) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");

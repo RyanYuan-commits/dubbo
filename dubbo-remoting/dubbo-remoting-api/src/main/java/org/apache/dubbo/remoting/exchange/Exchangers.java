@@ -98,6 +98,13 @@ public class Exchangers {
         return connect(URL.valueOf(url), handler);
     }
 
+    /**
+     * 获取 Exchange 层连接
+     *
+     * @param url url
+     * @param handler 一般是上层（Protocol 层）封装的 ExchangeHandler
+     * @return exchange client
+     */
     public static ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
         if (url == null) {
             throw new IllegalArgumentException("url == null");

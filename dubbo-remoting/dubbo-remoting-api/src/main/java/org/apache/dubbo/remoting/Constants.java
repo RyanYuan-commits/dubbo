@@ -18,6 +18,8 @@
 package org.apache.dubbo.remoting;
 
 
+import org.apache.dubbo.common.URL;
+
 public interface Constants {
 
     String BUFFER_KEY = "buffer";
@@ -132,6 +134,17 @@ public interface Constants {
     String HEARTBEAT_KEY = "heartbeat";
     int DEFAULT_HEARTBEAT = 60 * 1000;
     String HEARTBEAT_TIMEOUT_KEY = "heartbeat.timeout";
+
+    /**
+     * 与每个主机（ip:host）建立的连接数
+     * <p>
+     * 如果没有指定或为 0，使用共享连接模式，即对于一个 ip:host 共享一定数目的连接，默认每个 ip:host 共享 1 个连接；
+     * <p>
+     * 如果指定了非 0 的数字，则每次获取连接时都会创建指定数量的连接，每个 refer 构建时会获取指定数量的连接。
+     * <p>
+     * [1] 共享连接的数目由 {@link org.apache.dubbo.rpc.protocol.dubbo.Constants#SHARE_CONNECTIONS_KEY} 配置 <br/>
+     * [2] refer 引用核心方法：{@link org.apache.dubbo.rpc.protocol.AbstractProtocol#protocolBindingRefer(Class, URL)}
+     */
     String CONNECTIONS_KEY = "connections";
 
     int DEFAULT_BACKLOG = 1024;

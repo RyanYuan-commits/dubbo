@@ -34,7 +34,12 @@ import org.apache.dubbo.rpc.cluster.support.FailoverCluster;
  * <p>
  * <a href="http://en.wikipedia.org/wiki/Computer_cluster">Cluster</a>
  * <a href="http://en.wikipedia.org/wiki/Fault-tolerant_system">Fault-Tolerant</a>
- *
+ * <p>
+ *  Cluster 有两条继承链路：
+ *  <ol>
+ *      <li> {@link org.apache.dubbo.rpc.cluster.support.wrapper.MockClusterWrapper} </li>
+ *      <li> {@link org.apache.dubbo.rpc.cluster.support.wrapper.AbstractCluster} </li>
+ *  </ol>
  */
 @SPI(Cluster.DEFAULT)
 public interface Cluster {

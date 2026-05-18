@@ -92,7 +92,7 @@ public class DefaultExecutorRepository implements ExecutorRepository {
         Map<Integer, ExecutorService> executors = data.get(componentKey);
 
         if (executors == null) {
-            // 确保该方法在 createExecutorIfAbsent 方法之后被调用
+            // 异常情况，getExecutor() 在 createExecutorIfAbsent() 调用之前被调用
             logger.warn("No available executors, this is not expected, framework should call createExecutorIfAbsent first " +
                     "before coming to here.");
             return null;

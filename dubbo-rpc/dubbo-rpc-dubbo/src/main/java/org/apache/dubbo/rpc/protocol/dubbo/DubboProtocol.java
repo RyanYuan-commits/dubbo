@@ -448,8 +448,9 @@ public class DubboProtocol extends AbstractProtocol {
              * The xml configuration should have a higher priority than properties.
              */
             String shareConnectionsStr = url.getParameter(SHARE_CONNECTIONS_KEY, (String) null);
-            connections = Integer.parseInt(StringUtils.isBlank(shareConnectionsStr) ? ConfigUtils.getProperty(SHARE_CONNECTIONS_KEY,
-                    DEFAULT_SHARE_CONNECTIONS) : shareConnectionsStr);
+            connections = Integer.parseInt(StringUtils.isBlank(shareConnectionsStr) ?
+                    ConfigUtils.getProperty(SHARE_CONNECTIONS_KEY, DEFAULT_SHARE_CONNECTIONS) :
+                    shareConnectionsStr);
             shareClients = getSharedClient(url, connections);
         }
 
@@ -468,7 +469,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     /**
-     * Get shared connection
+     * 获取共享连接
      *
      * @param url
      * @param connectNum connectNum must be greater than or equal to 1
@@ -590,9 +591,7 @@ public class DubboProtocol extends AbstractProtocol {
     }
 
     /**
-     * Create new connection
-     *
-     * @param url
+     * 创建新的连接（ExchangeClient）
      */
     private ExchangeClient initClient(URL url) {
         String str = url.getParameter(CLIENT_KEY, url.getParameter(SERVER_KEY, DEFAULT_REMOTING_CLIENT));

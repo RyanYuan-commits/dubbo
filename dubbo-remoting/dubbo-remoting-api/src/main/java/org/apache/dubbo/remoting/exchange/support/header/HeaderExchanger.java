@@ -26,7 +26,7 @@ import org.apache.dubbo.remoting.exchange.Exchanger;
 import org.apache.dubbo.remoting.transport.DecodeHandler;
 
 /**
- * DefaultMessenger，在下层 Client 和 Server 的基础上添加装饰器
+ * DefaultMessenger，给 Transporter 层返回的 Client 或 Server 添加装饰
  */
 public class HeaderExchanger implements Exchanger {
 
@@ -34,6 +34,8 @@ public class HeaderExchanger implements Exchanger {
 
     @Override
     public ExchangeClient connect(URL url, ExchangeHandler handler) throws RemotingException {
+        // 提供心跳发送功能，维持与 Server 的连接
+        // 提供故障重连能力
         return new HeaderExchangeClient(Transporters.connect(url, new DecodeHandler(new HeaderExchangeHandler(handler))), true);
     }
 

@@ -63,7 +63,8 @@ public abstract class AbstractClient extends AbstractEndpoint implements Client 
      */
     protected volatile ExecutorService executor;
 
-    private ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class).getDefaultExtension();
+    private ExecutorRepository executorRepository = ExtensionLoader.getExtensionLoader(ExecutorRepository.class)
+            .getDefaultExtension();
 
     public AbstractClient(URL url, ChannelHandler handler) throws RemotingException {
         super(url, handler);
