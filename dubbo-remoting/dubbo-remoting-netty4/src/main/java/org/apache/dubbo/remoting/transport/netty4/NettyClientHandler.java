@@ -33,7 +33,11 @@ import io.netty.handler.timeout.IdleStateEvent;
 import static org.apache.dubbo.common.constants.CommonConstants.HEARTBEAT_EVENT;
 
 /**
- * NettyClientHandler
+ * 直接放置在 Netty Channel 中的 Handler，内部包装了一个 Dubbo handler，具备如下作用：
+ * <ol>
+ *   <li> 在 Channel 事件触发时调用 dubbo handler 的对应方法 </li>
+ *   <li> 在连接空闲时给服务端发送心跳 </li>
+ * </ol>
  */
 @io.netty.channel.ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {

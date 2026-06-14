@@ -135,6 +135,8 @@ public class NettyClient extends AbstractClient {
                 try {
                     // Close old channel
                     // copy reference
+                    // copy reference
+                    // copy reference
                     Channel oldChannel = NettyClient.this.channel;
                     if (oldChannel != null) {
                         try {
